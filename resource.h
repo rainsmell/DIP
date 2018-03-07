@@ -22,7 +22,10 @@
 #define IDD_DLG_LinerPara               312
 #define IDC_HIST                        1000
 #define IDC_EDIT1                       1001
+#define IDC_EDIT_A                      1001
 #define IDC_EDIT2                       1002
+#define IDC_EDIT_B                      1002
+#define IDC_EDIT3                       1003
 #define ID_32771                        32771
 #define ID_32772                        32772
 #define ID_32773                        32773
@@ -33,7 +36,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        314
 #define _APS_NEXT_COMMAND_VALUE         32774
-#define _APS_NEXT_CONTROL_VALUE         1003
+#define _APS_NEXT_CONTROL_VALUE         1004
 #define _APS_NEXT_SYMED_VALUE           310
 #endif
 #endif

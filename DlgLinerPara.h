@@ -21,6 +21,23 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-	double m_fA;
-	double m_fB;
+//	CString m_fA;
+	float m_fA;
+	float m_fB;
+
+	CRect m_MouseRect;
+
+	BOOL m_bIsDraging;
+
+	BOOL m_bDrawed;
+
+	CPoint m_p1;
+	CPoint m_p2;
+
+	afx_msg void OnEnKillfocusEditA();
+	afx_msg void OnEnKillfocusEditB();
+	virtual BOOL OnInitDialog();
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 };
