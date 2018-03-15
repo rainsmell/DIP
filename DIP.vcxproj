@@ -185,8 +185,11 @@
     <ClInclude Include="DIP.h" />
     <ClInclude Include="DIPDoc.h" />
     <ClInclude Include="DIPView.h" />
+    <ClInclude Include="DlgGamma.h" />
     <ClInclude Include="DlgHist.h" />
     <ClInclude Include="DlgLinerPara.h" />
+    <ClInclude Include="DlgLog.h" />
+    <ClInclude Include="DlgThreshold.h" />
     <ClInclude Include="Img.h" />
     <ClInclude Include="ImgProcess.h" />
     <ClInclude Include="MainFrm.h" />
@@ -200,8 +203,11 @@
     <ClCompile Include="DIP.cpp" />
     <ClCompile Include="DIPDoc.cpp" />
     <ClCompile Include="DIPView.cpp" />
+    <ClCompile Include="DlgGamma.cpp" />
     <ClCompile Include="DlgHist.cpp" />
     <ClCompile Include="DlgLinerPara.cpp" />
+    <ClCompile Include="DlgLog.cpp" />
+    <ClCompile Include="DlgThreshold.cpp" />
     <ClCompile Include="Img.cpp" />
     <ClCompile Include="ImgProcess.cpp" />
     <ClCompile Include="MainFrm.cpp" />

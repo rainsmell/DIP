@@ -13,6 +13,9 @@
 #include "DIPView.h"
 #include "DlgHist.h"
 #include "DlgLinerPara.h"
+#include "DlgLog.h"
+#include "DlgGamma.h"
+#include "DlgThreshold.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -33,6 +36,9 @@ BEGIN_MESSAGE_MAP(CDIPView, CView)
 	ON_COMMAND(ID_32771, &CDIPView::OnFileClean)
 	ON_COMMAND(ID_32772, &CDIPView::OnViewIntensity)
 	ON_COMMAND(ID_32773, &CDIPView::OnPointLiner)
+	ON_COMMAND(ID_32774, &CDIPView::OnPointLog)
+	ON_COMMAND(ID_32775, &CDIPView::OnPointGamma)
+	ON_COMMAND(ID_32776, &CDIPView::OnThreshold)
 END_MESSAGE_MAP()
 
 // CDIPView 构造/析构
@@ -235,4 +241,91 @@ void CDIPView::OnPointLiner()
 	pDoc->UpdateAllViews(NULL);
 
 	EndWaitCursor();
+}
+
+
+void CDIPView::OnPointLog()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess imgInput = pDoc->m_Image;
+
+	if (imgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	DlgLog dlg;
+	dlg.m_dC = 20;
+
+	if (dlg.DoModal() != IDOK)
+		return;
+
+	CImgProcess imgOutput = imgInput;
+
+	imgInput.LogTran(&imgOutput, dlg.m_dC);
+
+	pDoc->m_Image = imgOutput;
+
+	pDoc->SetModifiedFlag(true);
+	pDoc->UpdateAllViews(NULL);
+
+}
+
+
+void CDIPView::OnPointGamma()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+	CImgProcess imgInput = pDoc->m_Image;
+
+	if (imgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CDlgGamma dlg;
+	dlg.m_dEsp = 0;
+	dlg.m_dGamma = 1;
+
+	if (dlg.DoModal() != IDOK)
+		return;
+
+	CImgProcess imgOutput = imgInput;
+
+	imgInput.GammaTran(&imgOutput, dlg.m_dGamma, dlg.m_dEsp);
+
+	pDoc->m_Image = imgOutput;
+
+	pDoc->SetModifiedFlag(true);
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnThreshold()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess imgInput = pDoc->m_Image;
+
+	CDlgThreshold dlg;
+	dlg.m_dThre = 128;
+
+	if (dlg.DoModal() != IDOK)
+		return;
+
+	CImgProcess imgOutput = imgInput;
+
+	imgInput.Threshold(&imgOutput, dlg.m_dThre);
+
+	pDoc->m_Image = imgOutput;
+
+	pDoc->SetModifiedFlag(true);
+
+	pDoc->UpdateAllViews(NULL);
 }

@@ -47,6 +47,9 @@ public:
 	afx_msg void OnFileClean();
 	afx_msg void OnViewIntensity();
 	afx_msg void OnPointLiner();
+	afx_msg void OnPointLog();
+	afx_msg void OnPointGamma();
+	afx_msg void OnThreshold();
 };
 
 #ifndef _DEBUG  // DIPView.cpp 中的调试版本
