@@ -231,5 +231,8 @@ void CDIPView::OnPointLiner()
 	pDoc->m_Image = imgOutput;
 
 	pDoc->SetModifiedFlag(TRUE);
+
+	pDoc->UpdateAllViews(NULL);
+
 	EndWaitCursor();
 }
