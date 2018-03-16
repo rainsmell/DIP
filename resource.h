@@ -23,6 +23,7 @@
 #define IDD_DLG_LOG                     314
 #define IDD_DLG_Gamma                   316
 #define IDD_DIALOG2                     318
+#define IDD_DLG_ParLineTran             320
 #define IDC_HIST                        1000
 #define IDC_EDIT1                       1001
 #define IDC_EDIT_A                      1001
@@ -32,20 +33,24 @@
 #define IDC_EDIT3                       1003
 #define IDC_COORD                       1004
 #define IDC_THRESHOLD                   1005
+#define IDC_EDIT4                       1006
 #define ID_32771                        32771
 #define ID_32772                        32772
 #define ID_32773                        32773
 #define ID_32774                        32774
 #define ID_32775                        32775
 #define ID_32776                        32776
+#define ID_32777                        32777
+#define ID_32778                        32778
+#define ID_32779                        32779
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        320
-#define _APS_NEXT_COMMAND_VALUE         32777
-#define _APS_NEXT_CONTROL_VALUE         1006
+#define _APS_NEXT_RESOURCE_VALUE        322
+#define _APS_NEXT_COMMAND_VALUE         32780
+#define _APS_NEXT_CONTROL_VALUE         1007
 #define _APS_NEXT_SYMED_VALUE           310
 #endif
 #endif

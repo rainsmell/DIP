@@ -189,6 +189,7 @@
     <ClInclude Include="DlgHist.h" />
     <ClInclude Include="DlgLinerPara.h" />
     <ClInclude Include="DlgLog.h" />
+    <ClInclude Include="DlgParLineTran.h" />
     <ClInclude Include="DlgThreshold.h" />
     <ClInclude Include="Img.h" />
     <ClInclude Include="ImgProcess.h" />
@@ -207,6 +208,7 @@
     <ClCompile Include="DlgHist.cpp" />
     <ClCompile Include="DlgLinerPara.cpp" />
     <ClCompile Include="DlgLog.cpp" />
+    <ClCompile Include="DlgParLineTran.cpp" />
     <ClCompile Include="DlgThreshold.cpp" />
     <ClCompile Include="Img.cpp" />
     <ClCompile Include="ImgProcess.cpp" />

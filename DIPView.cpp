@@ -16,6 +16,7 @@
 #include "DlgLog.h"
 #include "DlgGamma.h"
 #include "DlgThreshold.h"
+#include "DlgParLineTran.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -39,6 +40,9 @@ BEGIN_MESSAGE_MAP(CDIPView, CView)
 	ON_COMMAND(ID_32774, &CDIPView::OnPointLog)
 	ON_COMMAND(ID_32775, &CDIPView::OnPointGamma)
 	ON_COMMAND(ID_32776, &CDIPView::OnThreshold)
+	ON_COMMAND(ID_32777, &CDIPView::OnPointParLineTran)
+	ON_COMMAND(ID_32778, &CDIPView::OnPointHistEq)
+	ON_COMMAND(ID_32779, &CDIPView::OnPointHistst)
 END_MESSAGE_MAP()
 
 // CDIPView 构造/析构
@@ -327,5 +331,104 @@ void CDIPView::OnThreshold()
 
 	pDoc->SetModifiedFlag(true);
 
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnPointParLineTran()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess imgInput = pDoc->m_Image;
+
+	if (imgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CDlgParLineTran dlg;
+	dlg.m_dX1 = 64;
+	dlg.m_dY1 = 32;
+	dlg.m_dX2 = 192;
+	dlg.m_dY2 = 225;
+
+	if (dlg.DoModal() != IDOK)
+		return;
+
+	CImgProcess imgOutput = imgInput;
+
+	imgInput.ParLinTran(&imgOutput, dlg.m_dX1, dlg.m_dX2, dlg.m_dY1, dlg.m_dY2);
+
+	pDoc->m_Image = imgOutput;
+	pDoc->SetModifiedFlag(TRUE);
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnPointHistEq()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess imgInput = pDoc->m_Image;
+
+	CImgProcess imgOutput = imgInput;
+
+	imgInput.Histeq(&imgOutput);
+
+	pDoc->m_Image = imgOutput;
+
+	pDoc->SetModifiedFlag(TRUE);
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnPointHistst()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess imgInput = pDoc->m_Image;
+
+	if (imgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess* pStdImage = new CImgProcess();
+
+	CString filePath;
+
+	CFileDialog openDlg(TRUE, 0, 0, 4 | 2, L"Bitmap Files (*.bmp)||");
+	if (openDlg.DoModal() == IDOK)
+		filePath = openDlg.GetPathName();
+	else
+		return;
+
+	pStdImage->AttachFromFile(filePath);
+	if (pStdImage->m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	double pdStdHist[256];
+	pStdImage->GenHist(pdStdHist);
+	CDlgHist histDlg;
+	histDlg.m_pdHist = pdStdHist;
+	if (histDlg.DoModal() != IDOK)
+		return;
+
+	CImgProcess imgOutput = imgInput;
+	imgInput.Histst(&imgOutput, pdStdHist);
+
+	pDoc->m_Image = imgOutput;
+
+	delete pStdImage;
+
+	pDoc->SetModifiedFlag(TRUE);
 	pDoc->UpdateAllViews(NULL);
 }

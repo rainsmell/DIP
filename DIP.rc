@@ -181,8 +181,12 @@ BEGIN
         MENUITEM "线性变换",                        ID_32773
         MENUITEM "对数变换",                        ID_32774
         MENUITEM "伽马变换",                        ID_32775
+        MENUITEM "分段线性变换",                      ID_32777
         MENUITEM SEPARATOR
         MENUITEM "阈值变换",                        ID_32776
+        MENUITEM SEPARATOR
+        MENUITEM "直方图均衡化",                      ID_32778
+        MENUITEM "直方图规定化",                      ID_32779
     END
     POPUP "编辑(&E)"
     BEGIN
@@ -329,6 +333,23 @@ BEGIN
     EDITTEXT        IDC_THRESHOLD,41,17,40,14,ES_AUTOHSCROLL
 END
 
+IDD_DLG_ParLineTran DIALOGEX 0, 0, 189, 86
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,41,61,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,104,61,50,14
+    EDITTEXT        IDC_EDIT1,39,15,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT2,117,15,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT3,39,37,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT4,117,37,40,14,ES_AUTOHSCROLL
+    LTEXT           "X1:",IDC_STATIC,21,18,12,8
+    LTEXT           "Y1:",IDC_STATIC,98,18,12,8
+    LTEXT           "X2:",IDC_STATIC,22,40,12,8
+    LTEXT           "Y2:",IDC_STATIC,98,39,12,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -424,6 +445,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 55
     END
+
+    IDD_DLG_ParLineTran, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 182
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 79
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -454,6 +483,11 @@ BEGIN
 END
 
 IDD_DIALOG2 AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_ParLineTran AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
