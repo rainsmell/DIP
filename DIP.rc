@@ -188,6 +188,14 @@ BEGIN
         MENUITEM "直方图均衡化",                      ID_32778
         MENUITEM "直方图规定化",                      ID_32779
     END
+    POPUP "几何变换(&G)"
+    BEGIN
+        MENUITEM "平移变换",                        ID_32780
+        MENUITEM SEPARATOR
+        MENUITEM "水平镜像",                        ID_32781
+        MENUITEM "垂直镜像",                        ID_32782
+        MENUITEM "转置",                          ID_32783
+    END
     POPUP "编辑(&E)"
     BEGIN
         MENUITEM "撤消(&U)\tCtrl+Z",              ID_EDIT_UNDO
@@ -350,6 +358,20 @@ BEGIN
     LTEXT           "Y2:",IDC_STATIC,98,39,12,8
 END
 
+IDD_DLG_Move DIALOGEX 0, 0, 139, 92
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "平移变换"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,18,69,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,71,69,50,14
+    GROUPBOX        "图像平移参数",IDC_STATIC,7,15,124,50
+    LTEXT           "水平平移量：",IDC_STATIC,17,29,49,8
+    LTEXT           "垂直平移量：",IDC_STATIC,17,47,49,8
+    EDITTEXT        IDC_EDIT1,67,26,52,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT2,67,45,52,14,ES_AUTOHSCROLL
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -453,6 +475,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 79
     END
+
+    IDD_DLG_Move, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 132
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 85
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -488,6 +518,11 @@ BEGIN
 END
 
 IDD_DLG_ParLineTran AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_Move AFX_DIALOG_LAYOUT
 BEGIN
     0
 END

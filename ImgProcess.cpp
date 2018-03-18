@@ -271,3 +271,63 @@ BOOL CImgProcess::Histst(CImgProcess* pTo, CImgProcess* pStd)
 	pStd->GenHist(hist);
 	return Histst(pTo, hist);
 }
+
+void CImgProcess::InMove(CImgProcess* pTo, int x, int y)
+{
+	int nHeight = pTo->GetHeight();
+	int nWidth = pTo->GetWidthPixel();
+
+	if (x > nWidth || y > nHeight)
+	{
+		MessageBox(NULL, L"³¬¹ýÍ¼Æ¬´óÐ¡", L"´íÎó", MB_OK | MB_ICONERROR);
+		return;
+	}
+
+	for (int i = 0; i < nWidth; i++)
+	{
+		for (int j = 0; j < nHeight; j++)
+		{
+			if (i - x < nWidth && i - x > 0 && j - y < nHeight && j - y > 0)
+				pTo->SetPixel(i, j, GetPixel(i - x, j - y));
+			else
+				pTo->SetPixel(i, j, RGB(0, 0, 0));
+		}
+	}
+}
+
+void CImgProcess::HorMirror(CImgProcess* pTo)
+{
+	int nWidth = pTo->GetWidthPixel();
+	int nHeight = pTo->GetHeight();
+
+	for (int i = 0; i < nWidth; i++)
+		for (int j = 0; j < nHeight; j++)
+			pTo->SetPixel(i, j, GetPixel(nWidth - i - 1, j));
+}
+
+void CImgProcess::VerMirror(CImgProcess* pTo)
+{
+	int nWidth = pTo->GetWidthPixel();
+	int nHeight = pTo->GetHeight();
+
+	for (int i = 0; i < nWidth; i++)
+		for (int j = 0; j < nHeight; j++)
+			pTo->SetPixel(i, j, GetPixel(i, nHeight - j - 1));
+} 
+
+void CImgProcess::Transpose(CImgProcess* pTo)
+{
+	int nWidth = pTo->GetWidthPixel();
+	int nHeight = pTo->GetHeight();
+
+	for (int i = 0; i < nWidth; i++)
+	{
+		for (int j = 0; j < nHeight; j++)
+		{
+			if (i < nHeight && j < nWidth)
+				pTo->SetPixel(i, j, GetPixel(j, i));
+			else
+				pTo->SetPixel(i, j, RGB(0, 0, 0));
+		}
+	}
+}

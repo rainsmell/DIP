@@ -17,6 +17,7 @@
 #include "DlgGamma.h"
 #include "DlgThreshold.h"
 #include "DlgParLineTran.h"
+#include "GeomMove.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -43,6 +44,10 @@ BEGIN_MESSAGE_MAP(CDIPView, CView)
 	ON_COMMAND(ID_32777, &CDIPView::OnPointParLineTran)
 	ON_COMMAND(ID_32778, &CDIPView::OnPointHistEq)
 	ON_COMMAND(ID_32779, &CDIPView::OnPointHistst)
+	ON_COMMAND(ID_32780, &CDIPView::OnGemoTran)
+	ON_COMMAND(ID_32781, &CDIPView::OnGemoHorMirror)
+	ON_COMMAND(ID_32782, &CDIPView::OnGemoVerMirror)
+	ON_COMMAND(ID_32783, &CDIPView::OnGemoTranspose)
 END_MESSAGE_MAP()
 
 // CDIPView ¹¹Ôì/Îö¹¹
@@ -428,6 +433,83 @@ void CDIPView::OnPointHistst()
 	pDoc->m_Image = imgOutput;
 
 	delete pStdImage;
+
+	pDoc->SetModifiedFlag(TRUE);
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnGemoTran()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	CGeomMove dlg;
+
+	dlg.m_dX = 0;
+	dlg.m_dY = 0;
+
+	if (dlg.DoModal() != IDOK)
+		return;
+
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.InMove(&ImgOutput, dlg.m_dX, dlg.m_dY);
+
+	pDoc->m_Image = ImgOutput;
+
+	pDoc->SetModifiedFlag(TRUE);
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnGemoHorMirror()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.HorMirror(&ImgOutput);
+
+	pDoc->m_Image = ImgOutput;
+
+	pDoc->SetModifiedFlag();
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnGemoVerMirror()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.VerMirror(&ImgOutput);
+
+	pDoc->m_Image = ImgOutput;
+
+	pDoc->SetModifiedFlag();
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnGemoTranspose()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.Transpose(&ImgOutput);
+
+	pDoc->m_Image = ImgOutput;
 
 	pDoc->SetModifiedFlag(TRUE);
 	pDoc->UpdateAllViews(NULL);

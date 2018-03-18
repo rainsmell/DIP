@@ -53,6 +53,10 @@ public:
 	afx_msg void OnPointParLineTran();
 	afx_msg void OnPointHistEq();
 	afx_msg void OnPointHistst();
+	afx_msg void OnGemoTran();
+	afx_msg void OnGemoHorMirror();
+	afx_msg void OnGemoVerMirror();
+	afx_msg void OnGemoTranspose();
 };
 
 #ifndef _DEBUG  // DIPView.cpp 中的调试版本
