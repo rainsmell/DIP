@@ -57,6 +57,8 @@ public:
 	afx_msg void OnGemoHorMirror();
 	afx_msg void OnGemoVerMirror();
 	afx_msg void OnGemoTranspose();
+	afx_msg void OnGemoScale();
+	afx_msg void OnGemoRotate();
 };
 
 #ifndef _DEBUG  // DIPView.cpp 中的调试版本

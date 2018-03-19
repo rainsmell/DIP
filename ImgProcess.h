@@ -17,10 +17,16 @@ public:
 	BOOL LogTran(CImgProcess* pTo, double dC);
 	BOOL GammaTran(CImgProcess* pTo, double gamma, double comp);
 	BOOL ParLinTran(CImgProcess* pTo, BYTE x1, BYTE x2, BYTE y1, BYTE y2);
+
 	void InMove(CImgProcess* pTo, int x, int y);
+	void Scale(CImgProcess* pTo, double times);
+	void Rotate(CImgProcess* pTo, float ang);
 	void HorMirror(CImgProcess* pTo);
 	void VerMirror(CImgProcess* pTo);
 	void Transpose(CImgProcess* pTo);
+
+	int InterpBilinear(double x, double y);
+
 	void Threshold(CImgProcess* pTo, BYTE nThres);
 };
 

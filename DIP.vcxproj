@@ -186,6 +186,8 @@
     <ClInclude Include="DIPDoc.h" />
     <ClInclude Include="DIPView.h" />
     <ClInclude Include="DlgGamma.h" />
+    <ClInclude Include="DlgGemoRotate.h" />
+    <ClInclude Include="DlgGemoScale.h" />
     <ClInclude Include="DlgHist.h" />
     <ClInclude Include="DlgLinerPara.h" />
     <ClInclude Include="DlgLog.h" />
@@ -206,6 +208,8 @@
     <ClCompile Include="DIPDoc.cpp" />
     <ClCompile Include="DIPView.cpp" />
     <ClCompile Include="DlgGamma.cpp" />
+    <ClCompile Include="DlgGemoRotate.cpp" />
+    <ClCompile Include="DlgGemoScale.cpp" />
     <ClCompile Include="DlgHist.cpp" />
     <ClCompile Include="DlgLinerPara.cpp" />
     <ClCompile Include="DlgLog.cpp" />

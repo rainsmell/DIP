@@ -18,6 +18,8 @@
 #include "DlgThreshold.h"
 #include "DlgParLineTran.h"
 #include "GeomMove.h"
+#include "DlgGemoScale.h"
+#include "DlgGemoRotate.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -48,6 +50,8 @@ BEGIN_MESSAGE_MAP(CDIPView, CView)
 	ON_COMMAND(ID_32781, &CDIPView::OnGemoHorMirror)
 	ON_COMMAND(ID_32782, &CDIPView::OnGemoVerMirror)
 	ON_COMMAND(ID_32783, &CDIPView::OnGemoTranspose)
+	ON_COMMAND(ID_32784, &CDIPView::OnGemoScale)
+	ON_COMMAND(ID_32785, &CDIPView::OnGemoRotate)
 END_MESSAGE_MAP()
 
 // CDIPView ¹¹Ôì/Îö¹¹
@@ -511,6 +515,49 @@ void CDIPView::OnGemoTranspose()
 
 	pDoc->m_Image = ImgOutput;
 
+	pDoc->SetModifiedFlag(TRUE);
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnGemoScale()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+	CImgProcess ImgOutput = ImgInput;
+
+	CDlgGemoScale dlg;
+	dlg.m_dTimes = 0.5;
+
+	if (dlg.DoModal() != IDOK)
+		return;
+
+	ImgInput.Scale(&ImgOutput, dlg.m_dTimes);
+
+	pDoc->m_Image = ImgOutput;
+	pDoc->SetModifiedFlag(TRUE);
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnGemoRotate()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+	CImgProcess ImgInput = pDoc->m_Image;
+	CImgProcess ImgOutput = ImgInput;
+
+	CDlgGemoRotate dlg;
+	dlg.m_fAng = 30.0f;
+
+	if (dlg.DoModal() != IDOK)
+		return;
+
+	ImgInput.Rotate(&ImgOutput, dlg.m_fAng);
+
+	pDoc->m_Image = ImgOutput;
 	pDoc->SetModifiedFlag(TRUE);
 	pDoc->UpdateAllViews(NULL);
 }

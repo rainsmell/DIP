@@ -3,6 +3,8 @@
 
 #include <math.h>
 
+#define PI 3.1415926
+
 CImgProcess::CImgProcess()
 {
 }
@@ -295,6 +297,23 @@ void CImgProcess::InMove(CImgProcess* pTo, int x, int y)
 	}
 }
 
+void CImgProcess::Scale(CImgProcess* pTo, double times)
+{
+	int nHeight = pTo->GetHeight();
+	int nWidth = pTo->GetWidthPixel();
+
+	for (int i = 0; i < nWidth; i++)
+	{
+		for (int j = 0; j < nHeight; j++)
+		{
+			if ((int)(i / times + 0.5) < nWidth && (int)(j / times + 0.5) < nHeight)
+				pTo->SetPixel(i, j, GetPixel(int(i / times + 0.5), int(j / times + 0.5)));
+			else
+				pTo->SetPixel(i, j, RGB(255, 255, 255));
+		}
+	}
+}
+
 void CImgProcess::HorMirror(CImgProcess* pTo)
 {
 	int nWidth = pTo->GetWidthPixel();
@@ -328,6 +347,83 @@ void CImgProcess::Transpose(CImgProcess* pTo)
 				pTo->SetPixel(i, j, GetPixel(j, i));
 			else
 				pTo->SetPixel(i, j, RGB(0, 0, 0));
+		}
+	}
+}
+
+void CImgProcess::Rotate(CImgProcess* pTo, float ang)
+{
+	int nHeight = pTo->GetHeight();
+	int nWidth = pTo->GetWidthPixel();
+
+	for (int i = 0; i < nWidth; i++)
+	{
+		for (int j = 0; j < nHeight; j++)
+		{
+			int x = (int)(i * ::cos(ang * PI / 180) + j * ::sin(ang * PI / 180) + 0.5);
+			int y = (int)(j * ::cos(ang * PI / 180) - i * ::sin(ang * PI / 180) + 0.5);
+			if (x < nWidth && y < nHeight && x >= 0 && y >= 0)
+				pTo->SetPixel(i, j, GetPixel(x, y));
+			else
+				pTo->SetPixel(i, j, RGB(0, 0, 0));
+		}
+	}
+}
+
+// 双线性插值计算
+int CImgProcess::InterpBilinear(double x, double y)
+{
+	double epsilon = 0.0001;
+
+	int x1, x2;
+	int y1, y2;
+
+	int nHeight = GetHeight();
+	int nWidth = GetWidthPixel();
+
+	x1 = (int)x;
+	x2 = (int)(x + 1);
+	y1 = (int)y;
+	y2 = (int)(y + 1);
+
+	if ((x < 0) || (x > nWidth - 1) || (y < 0) || (y > nHeight - 1))
+	{
+		return -1;
+	}
+	else
+	{
+		// x 超出右边界
+		if (::fabs(x - nWidth + 1) <= epsilon)
+		{
+			// y 超出底边
+			if (::fabs(y - nHeight + 1) <= epsilon)
+			{
+				return GetPixel(x1, y1);
+			}
+			else // 取样点位于右边界
+			{
+				unsigned char f1 = (unsigned char)GetPixel(x1, y1);
+				unsigned char f3 = (unsigned char)GetPixel(x1, y2);
+				return ((int)((y - y1) *(f3 - f1) + f1));
+			}
+		}
+		else if (::fabs(y - nHeight + 1) <= epsilon) // 取样点位于下边界
+		{
+			unsigned char f1 = (unsigned char)GetPixel(x1, y1);
+			unsigned char f2 = (unsigned char)GetPixel(x2, y1);
+			return ((int)((x - x1) * (f2 - f1) + f1));
+		}
+		else
+		{
+			unsigned char f1 = (unsigned char)GetPixel(x1, y1);
+			unsigned char f2 = (unsigned char)GetPixel(x2, y1);
+			unsigned char f3 = (unsigned char)GetPixel(x1, y2);
+			unsigned char f4 = (unsigned char)GetPixel(x2, y2);
+
+			unsigned char f12 = ((int)(f1 + (f2 - f1) * (x - x1)));
+			unsigned char f34 = ((int)(f3 + (f4 - f3) * (x - x1)));
+
+			return ((int)(f12 + (y - y1) * (f34 - f12)));
 		}
 	}
 }

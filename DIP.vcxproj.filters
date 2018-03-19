@@ -72,6 +72,12 @@
     <ClInclude Include="GeomMove.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DlgGemoScale.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgGemoRotate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DIP.cpp">
@@ -120,6 +126,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeomMove.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgGemoScale.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgGemoRotate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
