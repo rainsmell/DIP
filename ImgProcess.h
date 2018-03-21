@@ -1,5 +1,14 @@
 #pragma once
 #include "Img.h"
+
+extern float Template_Log[];
+extern float Template_VSobel[];
+extern float Template_HSobel[];
+extern float Template_Smooth_Gauss[];
+extern float Template_Smooth_Avg[];
+extern float Template_Laplacian1[];
+extern float Template_Laplacian2[];
+
 class CImgProcess :
 	public CImg
 {
@@ -26,6 +35,14 @@ public:
 	void Transpose(CImgProcess* pTo);
 
 	int InterpBilinear(double x, double y);
+
+	void Template(CImgProcess* pTo, int nTempH, int nTempW, int nTempMY, int nTempMX, FLOAT *pfArray, FLOAT fCoef);
+	int GetMedianValue(int* pArrGray, int len);
+	void MedianFilter(CImgProcess* pTo, int nFilterH, int nFilterW, int nFilterMY, int nFilterMX);
+	void AdaptiveMedianFilter(CImgProcess* pTo, int nFilterH, int nFilterW, int nFilterMY, int nFilterMX);
+	void FilterSobel(CImgProcess* pTo);
+	void FilterLaplacian(CImgProcess* pTo);
+	
 
 	void Threshold(CImgProcess* pTo, BYTE nThres);
 };

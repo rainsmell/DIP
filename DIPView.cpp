@@ -20,6 +20,7 @@
 #include "GeomMove.h"
 #include "DlgGemoScale.h"
 #include "DlgGemoRotate.h"
+#include "DlgSmoothConfig.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -52,6 +53,11 @@ BEGIN_MESSAGE_MAP(CDIPView, CView)
 	ON_COMMAND(ID_32783, &CDIPView::OnGemoTranspose)
 	ON_COMMAND(ID_32784, &CDIPView::OnGemoScale)
 	ON_COMMAND(ID_32785, &CDIPView::OnGemoRotate)
+	ON_COMMAND(ID_32786, &CDIPView::OnEnhaSmooth)
+	ON_COMMAND(ID_32787, &CDIPView::OnEnhaMedian)
+	ON_COMMAND(ID_32788, &CDIPView::OnEnhaAdaptiveMeidanFilter)
+	ON_COMMAND(ID_32789, &CDIPView::OnEnhaGradSobel)
+	ON_COMMAND(ID_32790, &CDIPView::OnEnhaGradLaplacian)
 END_MESSAGE_MAP()
 
 // CDIPView 构造/析构
@@ -559,5 +565,185 @@ void CDIPView::OnGemoRotate()
 
 	pDoc->m_Image = ImgOutput;
 	pDoc->SetModifiedFlag(TRUE);
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnEnhaSmooth()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	// 模板元素数组赋初值（默认为平均模板）
+	FLOAT	aValue[25] = { 1.0, 1.0, 1.0, 0.0, 0.0,
+		1.0, 1.0, 1.0, 0.0, 0.0,
+		1.0, 1.0, 1.0, 0.0, 0.0,
+		0.0, 0.0, 0.0, 0.0, 0.0,
+		0.0, 0.0, 0.0, 0.0, 0.0, };
+
+	// 创建对话框
+	CDlgSmoothConfig dlgPara;
+
+	// 初始化对话框变量值
+	dlgPara.m_intType = 0;
+	dlgPara.m_iTempH = 3;
+	dlgPara.m_iTempW = 3;
+	dlgPara.m_iTempMX = 1;
+	dlgPara.m_iTempMY = 1;
+	dlgPara.m_fTempC = (FLOAT)(1.0 / 9.0);
+	dlgPara.m_fpArray = aValue;
+
+	if (dlgPara.DoModal() != IDOK)
+		return;
+
+	int	nTempH;	// 模板高度
+	int	nTempW; // 模板宽度
+	FLOAT fTempC;// 模板系数
+	int		nTempMX;// 模板中心元素X坐标
+	int		nTempMY;// 模板中心元素Y坐标
+
+	nTempH = dlgPara.m_iTempH;
+	nTempW = dlgPara.m_iTempW;
+	nTempMX = dlgPara.m_iTempMX;
+	nTempMY = dlgPara.m_iTempMY;
+	fTempC = dlgPara.m_fTempC;
+
+
+
+	BeginWaitCursor();
+
+	//ImgInput.Template(&ImgOutput, dlgPara.m_iTempH, dlgPara.m_iTempW,
+		//dlgPara.m_iTempMY, dlgPara.m_iTempMY, aValue, dlgPara.m_fTempC);
+
+	ImgInput.Template(&ImgOutput, nTempH, nTempW, nTempMY, nTempMX, aValue, fTempC);
+
+	pDoc->m_Image = ImgOutput;
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+	pDoc->UpdateAllViews(NULL);
+
+	EndWaitCursor();
+}
+
+
+void CDIPView::OnEnhaMedian()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.MedianFilter(&ImgOutput, 3, 3, 1, 1);
+	
+	pDoc->m_Image = ImgOutput;
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnEnhaAdaptiveMeidanFilter()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.MedianFilter(&ImgOutput, 3, 3, 1, 1);
+
+	pDoc->m_Image = ImgOutput;
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnEnhaGradSobel()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.FilterSobel(&ImgOutput);
+
+	pDoc->m_Image = ImgOutput;
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnEnhaGradLaplacian()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.FilterLaplacian(&ImgOutput);
+
+	pDoc->m_Image = ImgOutput;
+	
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+		
 	pDoc->UpdateAllViews(NULL);
 }

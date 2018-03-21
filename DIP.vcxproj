@@ -192,6 +192,7 @@
     <ClInclude Include="DlgLinerPara.h" />
     <ClInclude Include="DlgLog.h" />
     <ClInclude Include="DlgParLineTran.h" />
+    <ClInclude Include="DlgSmoothConfig.h" />
     <ClInclude Include="DlgThreshold.h" />
     <ClInclude Include="GeomMove.h" />
     <ClInclude Include="Img.h" />
@@ -214,6 +215,7 @@
     <ClCompile Include="DlgLinerPara.cpp" />
     <ClCompile Include="DlgLog.cpp" />
     <ClCompile Include="DlgParLineTran.cpp" />
+    <ClCompile Include="DlgSmoothConfig.cpp" />
     <ClCompile Include="DlgThreshold.cpp" />
     <ClCompile Include="GeomMove.cpp" />
     <ClCompile Include="Img.cpp" />

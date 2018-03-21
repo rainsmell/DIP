@@ -59,6 +59,11 @@ public:
 	afx_msg void OnGemoTranspose();
 	afx_msg void OnGemoScale();
 	afx_msg void OnGemoRotate();
+	afx_msg void OnEnhaSmooth();
+	afx_msg void OnEnhaMedian();
+	afx_msg void OnEnhaAdaptiveMeidanFilter();
+	afx_msg void OnEnhaGradSobel();
+	afx_msg void OnEnhaGradLaplacian();
 };
 
 #ifndef _DEBUG  // DIPView.cpp 中的调试版本

@@ -5,6 +5,51 @@
 
 #define PI 3.1415926
 
+// Æ½¾ùÆ½»¬  1/9
+float Template_Smooth_Avg[9] = { 1, 1, 1,
+	1, 1, 1,
+	1, 1, 1 };
+// GaussÆ½»¬  1/16
+float Template_Smooth_Gauss[9] = { 1, 2, 1,
+	2, 4, 2,
+	1, 2, 1 };
+// Sobel´¹Ö±±ßÔµ¼ì²â
+float Template_HSobel[9] = { -1, 0, 1,
+	-2, 0, 2,
+	-1 ,0 , 1 };
+
+// SobelË®Æ½±ßÔµ¼ì²â
+float Template_VSobel[9] = { -1, -2, -1,
+	0, 0, 0,
+	1, 2, 1 };
+
+// LOG±ßÔµ¼ì²â
+float Template_Log[25] = { 0, 0, -1, 0, 0,
+	0, -1, -2, -1, 0,
+	-1, -2, 16, -2, -1,
+	0, -1, -2, -1, 0,
+	0, 0, -1, 0, 0 };
+
+//Sigma = 2£¬½ÏÆ½»¬
+double Template_Log1[25] = { 0.0448,    0.0468,    0.0564,    0.0468,    0.0448,
+	0.0468,    0.3167,    0.7146,    0.3167,    0.0468,
+	0.0564,    0.7146,   -4.9048,    0.7146,    0.0564,
+	0.0468,    0.3167,    0.7146,    0.3167,    0.0468,
+	0.0448,    0.0468,    0.0564,    0.0468,    0.0448
+};
+
+// Laplacian±ßÔµ¼ì²â
+float Template_Laplacian1[9] = { 0, -1, 0,
+	-1, 4, -1,
+	0, -1, 0
+};
+
+float Template_Laplacian2[9] = { -1, -1, -1,
+	-1, 8, -1,
+	-1, -1, -1
+};
+
+
 CImgProcess::CImgProcess()
 {
 }
@@ -368,6 +413,114 @@ void CImgProcess::Rotate(CImgProcess* pTo, float ang)
 				pTo->SetPixel(i, j, RGB(0, 0, 0));
 		}
 	}
+}
+
+void CImgProcess::Template(CImgProcess* pTo, int nTempH, int nTempW, int nTempMY, int nTempMX, FLOAT *pfArray, FLOAT fCoef)
+{
+	//pTo->InitPixels(0);
+
+	for (int i = nTempMY; i < GetHeight() - (nTempH - nTempMY) + 1; i++)
+		for (int j = nTempMX; j < GetWidthPixel() - (nTempW - nTempMX) + 1; j++)
+		{
+			float fResult = 0.0f;
+			for (int x = 0; x < nTempH; x++)
+				for (int y = 0; y < nTempW; y++)
+					fResult += GetGray(j - nTempMX + y, i - nTempMY + x) * pfArray[x * nTempW + y];
+			fResult *= fCoef;
+			fResult = (FLOAT)::fabs(fResult);
+			BYTE byte;
+			if (fResult > 255)
+				byte = 255;
+			else
+				byte = (BYTE)(fResult + 0.5);
+
+			pTo->SetPixel(j, i, RGB(byte, byte, byte));
+		}
+}
+
+int CImgProcess::GetMedianValue(int* pArrGray, int len)
+{
+	for (int i = 1; i < len; i++)
+		for (int j = i; j > 0 && (pArrGray[j] < pArrGray[j - 1]); j--)
+		{
+			int nTmp = pArrGray[j];
+			pArrGray[j] = pArrGray[j - 1];
+			pArrGray[j - 1] = nTmp;
+		}
+
+	if (len & 1)
+		return pArrGray[len / 2];
+	else
+		return (pArrGray[len / 2] + pArrGray[len / 2 - 1]) / 2;
+}
+
+void CImgProcess::MedianFilter(CImgProcess* pTo, int nFilterH, int nFilterW, int nFilterMY, int nFilterMX)
+{
+	pTo->InitPixels(0);
+
+	int nHeight = GetHeight();
+	int nWidth = GetWidthPixel();
+
+	int* pArrGray = new int[nFilterH * nFilterW];
+
+	for (int i = nFilterMY; i < nHeight - nFilterH + nFilterMY + 1; i++)
+		for (int j = nFilterMX; j < nWidth - nFilterW + nFilterMX + 1; j++)
+		{
+			for (int y = 0; y < nFilterH; y++)
+				for (int x = 0; x < nFilterW; x++)
+					pArrGray[y * nFilterH + x] = GetGray(j - nFilterMX + x, i - nFilterMY + y);
+			int nGray = GetMedianValue(pArrGray, nFilterH * nFilterW);
+			pTo->SetPixel(j, i, RGB(nGray, nGray, nGray));
+		}
+
+	delete [] pArrGray;
+}
+
+void CImgProcess::AdaptiveMedianFilter(CImgProcess* pTo, int nFilterH, int nFilterW, int nFilterMY, int nFilterMX)
+{
+	pTo->InitPixels(0);
+
+	int nHeight = GetHeight();
+	int nWidth = GetWidthPixel();
+
+	int* pArrGray = new int[nFilterH * nFilterW];
+
+	for (int i = nFilterMY; i < nHeight - nFilterH + nFilterMY + 1; i++)
+		for (int j = nFilterMX; j < nWidth - nFilterW + nFilterMX + 1; j++)
+		{
+			for (int y = 0; y < nFilterH; y++)
+				for (int x = 0; x < nFilterW; x++)
+					pArrGray[y * nFilterH + x] = GetGray(j - nFilterMX + x, i - nFilterMY + y);
+			int nGray = GetMedianValue(pArrGray, nFilterH * nFilterW);
+			if (GetGray(j, i) == pArrGray[0] || GetGray(j, i) == pArrGray[nFilterH * nFilterW - 1])
+				pTo->SetPixel(j, i, RGB(nGray, nGray, nGray));
+			else
+				pTo->SetPixel(j, i, GetPixel(j, i));
+		}
+
+	delete[] pArrGray;
+}
+
+void CImgProcess::FilterSobel(CImgProcess* pTo)
+{
+	CImgProcess img1, img2;
+	img1 = *pTo;
+	img2 = *pTo;
+
+	Template(&img1, 3, 3, 1, 1, Template_HSobel, 1);
+	Template(&img2, 3, 3, 1, 1, Template_VSobel, 1);
+
+	*pTo = img1 + img2;
+}
+
+void CImgProcess::FilterLaplacian(CImgProcess* pTo)
+{
+	CImgProcess img1;
+	img1 = *pTo;
+
+	Template(&img1, 3, 3, 1, 1, Template_Laplacian2, 1);
+	
+	*pTo = img1;
 }
 
 // Ë«ÏßÐÔ²åÖµ¼ÆËã

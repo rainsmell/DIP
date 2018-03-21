@@ -1,1 +1,7 @@
 /Debug
+/ipch
+/.vs
+*.opendb
+*.db
+*.APS
+
