@@ -64,6 +64,7 @@ public:
 	afx_msg void OnEnhaAdaptiveMeidanFilter();
 	afx_msg void OnEnhaGradSobel();
 	afx_msg void OnEnhaGradLaplacian();
+	afx_msg void OnEnhanceFilter();
 };
 
 #ifndef _DEBUG  // DIPView.cpp 中的调试版本

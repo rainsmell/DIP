@@ -58,6 +58,7 @@ BEGIN_MESSAGE_MAP(CDIPView, CView)
 	ON_COMMAND(ID_32788, &CDIPView::OnEnhaAdaptiveMeidanFilter)
 	ON_COMMAND(ID_32789, &CDIPView::OnEnhaGradSobel)
 	ON_COMMAND(ID_32790, &CDIPView::OnEnhaGradLaplacian)
+	ON_COMMAND(ID_32791, &CDIPView::OnEnhanceFilter)
 END_MESSAGE_MAP()
 
 // CDIPView 构造/析构
@@ -745,5 +746,34 @@ void CDIPView::OnEnhaGradLaplacian()
 		pDoc->SetTitle(pDoc->GetTitle() + L"*");
 	}
 		
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnEnhanceFilter()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.EnhanceFilter(&ImgOutput, 1.8, 3, 3, 1, 1, Template_Laplacian2, 1);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
 	pDoc->UpdateAllViews(NULL);
 }

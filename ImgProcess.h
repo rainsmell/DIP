@@ -1,4 +1,5 @@
 #pragma once
+#include <complex>
 #include "Img.h"
 
 extern float Template_Log[];
@@ -42,6 +43,12 @@ public:
 	void AdaptiveMedianFilter(CImgProcess* pTo, int nFilterH, int nFilterW, int nFilterMY, int nFilterMX);
 	void FilterSobel(CImgProcess* pTo);
 	void FilterLaplacian(CImgProcess* pTo);
+	void EnhanceFilter(CImgProcess *pTo, double dProportion,
+		int nTempH, int nTempW,
+		int nTempMY, int nTempMX, FLOAT *pfArray, FLOAT fCoef); //Ã·…˝¬À≤®
+
+	void FFT(std::complex<double>* TD, std::complex<double>* FD, int r);
+	void IFFT(std::complex<double>* TD, std::complex<double>* FD, int r);
 	
 
 	void Threshold(CImgProcess* pTo, BYTE nThres);

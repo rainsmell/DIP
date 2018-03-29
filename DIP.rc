@@ -206,6 +206,8 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "一阶梯度锐化(Sobel)",               ID_32789
         MENUITEM "二阶梯度锐化(Laplacian)",           ID_32790
+        MENUITEM SEPARATOR
+        MENUITEM "高提升滤波",                       ID_32791
     END
     POPUP "编辑(&E)"
     BEGIN

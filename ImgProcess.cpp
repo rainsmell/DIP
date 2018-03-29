@@ -2,6 +2,7 @@
 #include "ImgProcess.h"
 
 #include <math.h>
+#include <vector>
 
 #define PI 3.1415926
 
@@ -521,6 +522,169 @@ void CImgProcess::FilterLaplacian(CImgProcess* pTo)
 	Template(&img1, 3, 3, 1, 1, Template_Laplacian2, 1);
 	
 	*pTo = img1;
+}
+
+void CImgProcess::EnhanceFilter(CImgProcess *pTo, double dProportion,
+	int nTempH, int nTempW,
+	int nTempMY, int nTempMX, FLOAT *pfArray, FLOAT fCoef)
+{
+	int i, j;
+	int nHeight = GetHeight();
+	int nWidth = GetWidthPixel();
+
+	*pTo = *this; //目标图像初始化
+
+				  //GrayMat暂存按比例叠加图像（不能在CImg类对象中直接进行像素相加，因为相加的结果可能超出范围[0,255]）
+	std::vector< std::vector<int> > GrayMat;
+	std::vector<int> vecRow(nWidth, 0); //GrayMat中的一行（初始化为0）
+	for (i = 0; i<nHeight; i++)
+	{
+		GrayMat.push_back(vecRow);
+	}
+
+	//锐化图像，输出带符号响应，并与原图像按比例叠加			
+	for (i = nTempMY; i<GetHeight() - (nTempH - nTempMY) + 1; i++)
+	{
+		for (j = nTempMX; j<GetWidthPixel() - (nTempW - nTempMX) + 1; j++)
+		{
+			// (j,i)为中心点
+			float fResult = 0;
+			for (int k = 0; k<nTempH; k++)
+			{
+				for (int l = 0; l<nTempW; l++)
+				{
+					//计算加权和
+					fResult += GetGray(j + l - nTempMX, i + k - nTempMY) * pfArray[k * nTempW + l];
+				}
+			}
+
+			// 乘以系数
+			fResult *= fCoef;
+
+			//限制响应值范围
+			if (fResult > 255)
+				fResult = 255;
+			if (fResult < -255)
+				fResult = -255;
+
+			GrayMat[i][j] = (int)double(dProportion * GetGray(j, i) + fResult + 0.5);//求和，结果四舍五入
+		}//for j
+	}//for i
+
+
+
+	int nMax = 0;//最大灰度和值
+	int nMin = 65535; //最小灰度和值
+
+					  //统计最大、最小值
+	for (i = nTempMY; i<GetHeight() - (nTempH - nTempMY) + 1; i++)
+	{
+		for (j = nTempMX; j<GetWidthPixel() - (nTempW - nTempMX) + 1; j++)
+		{
+			if (GrayMat[i][j] > nMax)
+				nMax = GrayMat[i][j];
+			if (GrayMat[i][j] < nMin)
+				nMin = GrayMat[i][j];
+		}// j
+	}// i
+
+	 //将GrayMat的取值范围重新归一化到[0, 255]
+	int nSpan = nMax - nMin;
+
+	for (i = nTempMY; i<GetHeight() - (nTempH - nTempMY) + 1; i++)
+	{
+		for (j = nTempMX; j<GetWidthPixel() - (nTempW - nTempMX) + 1; j++)
+		{
+			BYTE bt;
+			if (nSpan > 0)
+				bt = (GrayMat[i][j] - nMin) * 255 / nSpan;
+			else if (GrayMat[i][j] <= 255)
+				bt = GrayMat[i][j];
+			else
+				bt = 255;
+
+			pTo->SetPixel(j, i, RGB(bt, bt, bt));
+
+		}// for j
+	}// for i
+}
+
+void CImgProcess::FFT(std::complex<double>* TD, std::complex<double>* FD, int r)
+{
+	LONG	count;
+	int		i, j, k;
+	int		bfsize, p;
+	double  angle;
+
+	std::complex<double> *W, *X1, *X2, *X;
+
+	count = 1 << r;
+
+	W = new std::complex<double>(count / 2);
+	X = new std::complex<double>(count);
+	X1 = new std::complex<double>(count);
+	X2 = new std::complex<double>(count);
+
+	for (i = 0; i < count / 2; i++)
+	{
+		angle = -i * PI * 2.0 / count;
+		W[i] = std::complex<double>(cos(angle), sin(angle));
+	}
+
+	memcpy(X1, TD, sizeof(std::complex<double>) * count);
+
+	for (k = 0; k < r; k++)
+	{
+		for (j = 0; j < 1 << k; j++)
+		{
+			bfsize = 1 << (r - k);
+			for (i = 0; i < bfsize / 2; i++)
+			{
+				p = j * bfsize;
+				X2[i + p] = X1[i + p] + X1[i + p + bfsize / 2];
+				X2[i + p + bfsize / 2] = (X1[i + p] + X1[i + p + bfsize / 2]) * W[i * (1 << k)];
+			}
+		}
+		X = X1;
+		X1 = X2;
+		X2 = X;
+	}
+
+	for (j = 0; j < count; j++)
+	{
+		p = 0;
+		for (i = 0; i < r; i++)
+			if (j & (1 << i))
+				p += 1 << (r - i - 1);
+		FD[j] = X1[p];
+	}
+
+	delete W;
+	delete X1;
+	delete X2;
+}
+
+void CImgProcess::IFFT(std::complex<double>* TD, std::complex<double>* FD, int r)
+{
+	LONG count;
+
+	std::complex<double>* X;
+
+	count = 1 << r;
+
+	X = new std::complex<double>[count];
+
+	memcpy(X, TD, sizeof(std::complex<double>) * count);
+
+	for (int i = 0; i < count; i++)
+		X[i] = std::complex<double>(X[i].real(), -X[i].imag());
+
+	FFT(X, FD, r);
+
+	for (int i = 0; i < count; i++)
+		FD[i] = std::complex<double>(FD[i].real() / count, -FD[i].imag() / count);
+
+	delete X;
 }
 
 // 双线性插值计算
