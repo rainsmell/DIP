@@ -209,6 +209,10 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "高提升滤波",                       ID_32791
     END
+    POPUP "频率滤波(Q)"
+    BEGIN
+        MENUITEM "傅里叶变换",                       ID_32792
+    END
     POPUP "编辑(&E)"
     BEGIN
         MENUITEM "撤消(&U)\tCtrl+Z",              ID_EDIT_UNDO

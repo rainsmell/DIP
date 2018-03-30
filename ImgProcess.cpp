@@ -620,10 +620,10 @@ void CImgProcess::FFT(std::complex<double>* TD, std::complex<double>* FD, int r)
 
 	count = 1 << r;
 
-	W = new std::complex<double>(count / 2);
-	X = new std::complex<double>(count);
-	X1 = new std::complex<double>(count);
-	X2 = new std::complex<double>(count);
+	W = new std::complex<double>[count / 2];
+	X = new std::complex<double>[count];
+	X1 = new std::complex<double>[count];
+	X2 = new std::complex<double>[count];
 
 	for (i = 0; i < count / 2; i++)
 	{
@@ -642,7 +642,7 @@ void CImgProcess::FFT(std::complex<double>* TD, std::complex<double>* FD, int r)
 			{
 				p = j * bfsize;
 				X2[i + p] = X1[i + p] + X1[i + p + bfsize / 2];
-				X2[i + p + bfsize / 2] = (X1[i + p] + X1[i + p + bfsize / 2]) * W[i * (1 << k)];
+				X2[i + p + bfsize / 2] = (X1[i + p] - X1[i + p + bfsize / 2]) * W[i * (1 << k)];
 			}
 		}
 		X = X1;
@@ -659,9 +659,9 @@ void CImgProcess::FFT(std::complex<double>* TD, std::complex<double>* FD, int r)
 		FD[j] = X1[p];
 	}
 
-	delete W;
-	delete X1;
-	delete X2;
+	delete [] W;
+	delete [] X1;
+	delete [] X2;
 }
 
 void CImgProcess::IFFT(std::complex<double>* TD, std::complex<double>* FD, int r)
@@ -685,6 +685,98 @@ void CImgProcess::IFFT(std::complex<double>* TD, std::complex<double>* FD, int r
 		FD[i] = std::complex<double>(FD[i].real() / count, -FD[i].imag() / count);
 
 	delete X;
+}
+
+void CImgProcess::FFT2(CImgProcess* pTo, BOOL bExpand, std::complex<double>* pOutput, BYTE bFillColor)
+{
+	double dTemp;
+	LONG i, j;
+	LONG w, h;
+
+	int wp, hp;
+
+	w = h = 1;
+	wp = hp = 0;
+
+	while (w * 2 <= GetWidthPixel())
+	{
+		w *= 2;
+		wp++;
+	}
+
+	while (h * 2 <= GetHeight())
+	{
+		h *= 2;
+		hp++;
+	}
+
+	if ((bExpand) && (w != GetWidthPixel()) && (h != GetHeight()))
+	{
+		w *= 2; wp++;
+		h *= 2; hp++;
+	}
+
+	std::complex<double>* TD = new std::complex<double>[w * h];
+	std::complex<double>* FD = new std::complex<double>[w * h];
+
+	for (i = 0; i < h; i++)
+	{
+		for (j = 0; j < w; j++)
+		{
+			if (bExpand)
+			{
+				if ((j < GetWidthPixel()) && (i < GetHeight()))
+					TD[j + w * i] = std::complex<double>(GetGray(j, i), 0);
+				else
+					TD[j + w * i] = std::complex<double>(bFillColor, 0);
+			}
+			else
+			{
+				TD[j + w * i] = std::complex<double>(GetGray(j, i), 0);
+			}
+		}
+	}
+
+	for (i = 0; i < h; i++)
+		FFT(&TD[i * w], &FD[i * w], wp);
+
+	// 转置矩阵
+	for (i = 0; i < h; i++)
+		for (j = 0; j < w; j++)
+			TD[i + h * j] = FD[j + w * i];
+
+	for (i = 0; i < w; i++)
+		FFT(&TD[i * h], &FD[i * h], hp);
+
+	for (i = 0; i < h; i++)
+		for (j = 0; j < w; j++)
+			pOutput[i * w + j] = FD[i * w + j];
+
+	if (pTo)
+	{
+		pTo->ImResize(h, w);
+
+		double dMax = 0, dMin = 1E+6;
+
+		for (i = 0; i < w * h; i++)
+		{
+			dTemp = sqrt(FD[i].real() * FD[i].real() + FD[i].imag() * FD[i].imag());
+			dTemp = log(1 + dTemp);
+			if (dTemp > dMax) dMax = dTemp;
+			if (dTemp < dMin) dMin = dTemp;
+		}
+
+		for (i = 0; i < w * h; i++)
+		{
+			dTemp = sqrt(FD[i].real() * FD[i].real() + FD[i].imag() * FD[i].imag());
+			dTemp = log(1 + dTemp);
+			dTemp = (dTemp - dMin) / (dMax - dMin) * 255;
+			int hi = i / w; int wi = i % w;
+			pTo->SetPixel((wi >= w/2 ? wi - w/2 : wi + w/2), (hi >= h/2 ? hi - h/2 : hi + h/2), RGB(dTemp, dTemp, dTemp));
+		}
+	}
+	delete [] TD;
+	delete [] FD;
 }
 
 // 双线性插值计算

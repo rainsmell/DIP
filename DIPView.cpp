@@ -59,6 +59,7 @@ BEGIN_MESSAGE_MAP(CDIPView, CView)
 	ON_COMMAND(ID_32789, &CDIPView::OnEnhaGradSobel)
 	ON_COMMAND(ID_32790, &CDIPView::OnEnhaGradLaplacian)
 	ON_COMMAND(ID_32791, &CDIPView::OnEnhanceFilter)
+	ON_COMMAND(ID_32792, &CDIPView::OnFreFilterFFT2)
 END_MESSAGE_MAP()
 
 // CDIPView 构造/析构
@@ -776,4 +777,39 @@ void CDIPView::OnEnhanceFilter()
 	}
 
 	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnFreFilterFFT2()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	int w = ImgInput.GetWidthPixel();
+	int h = ImgInput.GetHeight();
+
+	std::complex<double>* dft = new std::complex<double>[w * h];
+	ImgOutput.FFT2(&ImgOutput, FALSE, dft, 0);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+
+	delete[] dft;
 }

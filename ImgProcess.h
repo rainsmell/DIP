@@ -49,6 +49,7 @@ public:
 
 	void FFT(std::complex<double>* TD, std::complex<double>* FD, int r);
 	void IFFT(std::complex<double>* TD, std::complex<double>* FD, int r);
+	void FFT2(CImgProcess* pTo, BOOL bExpand, std::complex<double>* pOutput, BYTE bFillColor);
 	
 
 	void Threshold(CImgProcess* pTo, BYTE nThres);
