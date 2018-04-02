@@ -28,6 +28,9 @@
 #define IDD_DLG_Scale                   324
 #define IDD_DLG_Rotate                  326
 #define IDD_DLG_Smooth                  328
+#define IDD_DLG_LPF                     330
+#define IDD_DIALOG3                     332
+#define IDD_DLG_GaussFilter             332
 #define IDC_HIST                        1000
 #define IDC_EDIT1                       1001
 #define IDC_EDIT_A                      1001
@@ -95,13 +98,16 @@
 #define ID_32790                        32790
 #define ID_32791                        32791
 #define ID_32792                        32792
+#define ID_32793                        32793
+#define ID_32794                        32794
+#define ID_32795                        32795
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        330
-#define _APS_NEXT_COMMAND_VALUE         32793
+#define _APS_NEXT_RESOURCE_VALUE        334
+#define _APS_NEXT_COMMAND_VALUE         32796
 #define _APS_NEXT_CONTROL_VALUE         1024
 #define _APS_NEXT_SYMED_VALUE           310
 #endif

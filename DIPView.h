@@ -66,6 +66,9 @@ public:
 	afx_msg void OnEnhaGradLaplacian();
 	afx_msg void OnEnhanceFilter();
 	afx_msg void OnFreFilterFFT2();
+	afx_msg void OnFreFilterIFFT2();
+	afx_msg void OnFreqIdealLPF();
+	afx_msg void OnFreqGaussFilter();
 };
 
 #ifndef _DEBUG  // DIPView.cpp 中的调试版本

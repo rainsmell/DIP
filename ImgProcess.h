@@ -47,10 +47,20 @@ public:
 		int nTempH, int nTempW,
 		int nTempMY, int nTempMX, FLOAT *pfArray, FLOAT fCoef); //提升滤波
 
+	// 一维和二维快速傅里叶变换
 	void FFT(std::complex<double>* TD, std::complex<double>* FD, int r);
 	void IFFT(std::complex<double>* TD, std::complex<double>* FD, int r);
 	void FFT2(CImgProcess* pTo, BOOL bExpand, std::complex<double>* pOutput, BYTE bFillColor);
+	void IFFT2(CImgProcess* pTo, std::complex<double>* pDFT, int iOutH, int iOutW, int iHeight, int iWidth);
 	
+	// 频域滤波函数，pdFilter为频域滤波器
+	void FreqFilter(CImgProcess* pTo, double* pdFilter, BYTE fillColor);
+
+	// 理想低通滤波器
+	void FreqIdealLPF(double* pdFilter, int nFreq);
+	
+	// 高斯低通滤波器
+	void FreqGaussLPF(double* pdFilter, int nSigma);
 
 	void Threshold(CImgProcess* pTo, BYTE nThres);
 };

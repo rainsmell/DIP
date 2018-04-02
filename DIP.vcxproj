@@ -185,7 +185,9 @@
     <ClInclude Include="DIP.h" />
     <ClInclude Include="DIPDoc.h" />
     <ClInclude Include="DIPView.h" />
+    <ClInclude Include="DlgFreqLPF.h" />
     <ClInclude Include="DlgGamma.h" />
+    <ClInclude Include="DlgGaussFilter.h" />
     <ClInclude Include="DlgGemoRotate.h" />
     <ClInclude Include="DlgGemoScale.h" />
     <ClInclude Include="DlgHist.h" />
@@ -208,7 +210,9 @@
     <ClCompile Include="DIP.cpp" />
     <ClCompile Include="DIPDoc.cpp" />
     <ClCompile Include="DIPView.cpp" />
+    <ClCompile Include="DlgFreqLPF.cpp" />
     <ClCompile Include="DlgGamma.cpp" />
+    <ClCompile Include="DlgGaussFilter.cpp" />
     <ClCompile Include="DlgGemoRotate.cpp" />
     <ClCompile Include="DlgGemoScale.cpp" />
     <ClCompile Include="DlgHist.cpp" />

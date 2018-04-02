@@ -3,6 +3,9 @@
 
 #include <math.h>
 #include <vector>
+#include <conio.h>
+
+#include <iostream>
 
 #define PI 3.1415926
 
@@ -664,7 +667,7 @@ void CImgProcess::FFT(std::complex<double>* TD, std::complex<double>* FD, int r)
 	delete [] X2;
 }
 
-void CImgProcess::IFFT(std::complex<double>* TD, std::complex<double>* FD, int r)
+void CImgProcess::IFFT(std::complex<double>* FD, std::complex<double>* TD, int r)
 {
 	LONG count;
 
@@ -674,15 +677,15 @@ void CImgProcess::IFFT(std::complex<double>* TD, std::complex<double>* FD, int r
 
 	X = new std::complex<double>[count];
 
-	memcpy(X, TD, sizeof(std::complex<double>) * count);
+	memcpy(X, FD, sizeof(std::complex<double>) * count);
 
 	for (int i = 0; i < count; i++)
 		X[i] = std::complex<double>(X[i].real(), -X[i].imag());
 
-	FFT(X, FD, r);
+	FFT(X, TD, r);
 
 	for (int i = 0; i < count; i++)
-		FD[i] = std::complex<double>(FD[i].real() / count, -FD[i].imag() / count);
+		TD[i] = std::complex<double>(TD[i].real() / count, -TD[i].imag() / count);
 
 	delete X;
 }
@@ -750,7 +753,7 @@ void CImgProcess::FFT2(CImgProcess* pTo, BOOL bExpand, std::complex<double>* pOu
 
 	for (i = 0; i < h; i++)
 		for (j = 0; j < w; j++)
-			pOutput[i * w + j] = FD[i * w + j];
+			pOutput[i * w + j] = FD[j * h + i];
 
 	if (pTo)
 	{
@@ -777,6 +780,130 @@ void CImgProcess::FFT2(CImgProcess* pTo, BOOL bExpand, std::complex<double>* pOu
 	}
 	delete [] TD;
 	delete [] FD;
+}
+
+void CImgProcess::IFFT2(CImgProcess* pTo, std::complex<double>* pDFT, int iOutH, int iOutW, int iHeight, int iWidth)
+{
+	int w = 1, h = 1;
+	int wp = 0, hp = 0;
+
+	if (iOutW == 0) iOutW = iWidth;
+	if (iOutH == 0) iOutH = iHeight;
+
+	while (w * 2 <= iOutW) { w *= 2; wp++; }
+	while (h * 2 <= iOutH) { h *= 2; hp++; }
+
+	pTo->ImResize(h, w);
+
+	std::complex<double>* FD = new std::complex<double>[w * h];
+
+	memcpy(FD, pDFT, sizeof(std::complex<double>) * w * h);
+
+	for (int i = 0; i < h; i++)
+		IFFT(&FD[i * w], &pDFT[i * w], wp);
+
+	for (int i = 0; i < h; i++)
+		for (int j = 0; j < w; j++)
+			FD[j * h + i] = pDFT[i * w + j];
+
+	for (int i = 0; i < w; i++)
+		IFFT(&FD[i * h], &pDFT[i * h], hp);
+
+	for (int i = 0; i < h; i++)
+		for (int j = 0; j < w; j++)
+			FD[i * w + j] = pDFT[j * h + i];
+
+	if (pTo)
+	{
+		double dTemp = 0;
+		double dMax = 0, dMin = 1E+6;
+		for (int i = 0; i < w * h; i++)
+		{
+			dTemp = FD[i].real();
+			if (dTemp > dMax) dMax = dTemp;
+			if (dTemp < dMin) dMin = dTemp;
+		}
+
+		for (int i = 0; i < h; i++)
+		{
+			for (int j = 0; j < w; j++)
+			{
+				dTemp = FD[i * w + j].real();
+				dTemp = (dTemp - dMin) / (dMax - dMin) * 255;
+				pTo->SetPixel(j, i, RGB(dTemp, dTemp, dTemp));
+			}
+		}
+	}
+
+	delete[] FD;
+}
+
+void CImgProcess::FreqFilter(CImgProcess* pTo, double* dpFilter, BYTE fillColor)
+{
+	int w = 1, h = 1;
+
+	while (w * 2 <= GetWidthPixel()) { w *= 2; }
+	//if (w != GetWidthPixel()) w *= 2;
+	while (h * 2 <= GetHeight()) { h *= 2; }
+	//if (h != GetHeight()) h *= 2;
+
+	std::complex<double>* cdFreqImg = new std::complex<double>[w * h];
+
+	FFT2(NULL, 0, cdFreqImg, fillColor);
+
+	for (int i = 0; i < w * h; i++)
+		cdFreqImg[i] *= dpFilter[i];
+
+	IFFT2(pTo, cdFreqImg, 0, 0, h, w);
+
+	delete[] cdFreqImg;
+}
+
+void CImgProcess::FreqIdealLPF(double* dpFilter, int nFreq)
+{
+	/*int w = GetWidthPixel();
+	int h = GetHeight();*/
+
+	int w = 1, h = 1;
+
+	while (w * 2 <= GetWidthPixel()) w *= 2;
+	while (h * 2 <= GetHeight()) h *= 2;
+
+	for (int i = 0; i < h; i++)
+		for (int j = 0; j < w; j++)
+			if (sqrt(pow(double(i - h / 2), 2) + pow(double(j - w / 2), 2)) > nFreq)
+				//dpFilter[i * w + j] = 0;
+				dpFilter[(i < h / 2 ? i + h / 2 : i - h / 2) * w + (j < w / 2 ? j + w / 2 : j - w / 2)] = 0;
+			else
+				//dpFilter[i * w + j] = 1;
+				dpFilter[(i < h / 2 ? i + h / 2 : i - h / 2) * w + (j < w / 2 ? j + w / 2 : j - w / 2)] = 1;
+
+	if (AllocConsole())
+	{
+		freopen("CONOUT$", "w", stdout);
+		for (int i = 0; i < h; i += 10)
+		{
+			for (int j = 0; j < w; j += 10)
+			{
+				std::cout << dpFilter[i * w + j] << ' ';
+			}
+			std::cout << std::endl;
+		}
+	}
+	FreeConsole();
+}
+
+void CImgProcess::FreqGaussLPF(double* dpFilter, int nSigma)
+{
+	int w = 1, h = 1;
+	
+	while (w * 2 <= GetWidthPixel()) w *= 2;
+	while (h * 2 <= GetHeight()) h *= 2;
+
+	for (int i = 0; i < h; i++)
+		for (int j = 0; j < w; j++)
+			dpFilter[(i < h / 2 ? i + h / 2 : i - h / 2) * w + (j < w / 2 ? j + h / 2 : j - h / 2)] =
+			exp(-(pow(i - h/2, 2) + pow(j - w/2, 2)) / (2 * pow(nSigma, 2)));
 }
 
 // 双线性插值计算

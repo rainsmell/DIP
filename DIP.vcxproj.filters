@@ -81,6 +81,12 @@
     <ClInclude Include="DlgSmoothConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DlgFreqLPF.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgGaussFilter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DIP.cpp">
@@ -138,6 +144,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DlgSmoothConfig.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgFreqLPF.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgGaussFilter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
