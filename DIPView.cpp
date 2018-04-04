@@ -23,6 +23,9 @@
 #include "DlgSmoothConfig.h"
 #include "DlgFreqLPF.h"
 #include "DlgGaussFilter.h"
+#include "DlgInvRad.h"
+
+#include <iostream>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -65,6 +68,15 @@ BEGIN_MESSAGE_MAP(CDIPView, CView)
 	ON_COMMAND(ID_32793, &CDIPView::OnFreFilterIFFT2)
 	ON_COMMAND(ID_32794, &CDIPView::OnFreqIdealLPF)
 	ON_COMMAND(ID_32795, &CDIPView::OnFreqGaussFilter)
+	ON_COMMAND(ID_32796, &CDIPView::OnFreqGaussHPF)
+	ON_COMMAND(ID_32797, &CDIPView::OnFreqLaplace)
+	ON_COMMAND(ID_32798, &CDIPView::OnAddUniform)
+	ON_COMMAND(ID_32799, &CDIPView::OnAddGaussian)
+	ON_COMMAND(ID_32800, &CDIPView::OnAddSlatPepper)
+	ON_COMMAND(ID_32801, &CDIPView::OnAddRayleigh)
+	ON_COMMAND(ID_32802, &CDIPView::OnInvTuihua)
+	ON_COMMAND(ID_32803, &CDIPView::OnInvFilter)
+	ON_COMMAND(ID_32804, &CDIPView::OnFreqWienerFilter)
 END_MESSAGE_MAP()
 
 // CDIPView 构造/析构
@@ -872,8 +884,8 @@ void CDIPView::OnFreqIdealLPF()
 
 	CImgProcess ImgOutput = ImgInput;
 
-	int w = ImgOutput.GetWidthPixel();
-	int h = ImgOutput.GetHeight();
+	int w = ImgOutput.GetFreqWidth(ImgOutput.GetWidthPixel(), TRUE);
+	int h = ImgOutput.GetFreqHeight(ImgOutput.GetHeight(), TRUE);
 
 	double* dpFilter = new double[w * h];
 
@@ -918,8 +930,8 @@ void CDIPView::OnFreqGaussFilter()
 
 	CImgProcess ImgOutput = ImgInput;
 
-	int w = ImgOutput.GetWidthPixel();
-	int h = ImgOutput.GetHeight();
+	int w = ImgOutput.GetFreqWidth(ImgOutput.GetWidthPixel(), FALSE);
+	int h = ImgOutput.GetFreqHeight(ImgOutput.GetHeight(), FALSE);
 
 	double* dpFilter = new double[w * h];
 
@@ -946,4 +958,331 @@ void CDIPView::OnFreqGaussFilter()
 	pDoc->UpdateAllViews(NULL);
 
 	delete[] dpFilter;
+}
+
+
+void CDIPView::OnFreqGaussHPF()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	int w = ImgOutput.GetFreqWidth(ImgOutput.GetWidthPixel(), FALSE);
+	int h = ImgOutput.GetFreqHeight(ImgOutput.GetHeight(), FALSE);
+
+	double* dpFilter = new double[w * h];
+
+	CDlgGaussFilter dlg;
+	dlg.m_dSigma = 20;
+
+	if (dlg.DoModal() != IDOK)
+	{
+		delete[] dpFilter;
+		return;
+	}
+
+	ImgOutput.FreqGaussHPF(dpFilter, dlg.m_dSigma);
+	ImgOutput.FreqFilter(&ImgOutput, dpFilter, 0);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+
+	delete[] dpFilter;
+}
+
+
+void CDIPView::OnFreqLaplace()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	int w = ImgOutput.GetFreqWidth(ImgOutput.GetWidthPixel(), FALSE);
+	int h = ImgOutput.GetFreqHeight(ImgOutput.GetHeight(), FALSE);
+
+	double* dpFilter = new double[w * h];
+
+	ImgOutput.FreqLaplace(dpFilter);
+	ImgOutput.FreqFilter(&ImgOutput, dpFilter, 0);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+
+	delete[] dpFilter;
+}
+
+
+void CDIPView::OnAddUniform()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.AddUniform(&ImgOutput);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+
+}
+
+void CDIPView::OnAddGaussian()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.AddGaussian(&ImgOutput);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnAddSlatPepper()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.AddSlat_Pepper(&ImgOutput);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnAddRayleigh()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.AddRayleigh(&ImgOutput);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnInvTuihua()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	int w = ImgOutput.GetFreqWidth(ImgOutput.GetWidthPixel(), FALSE);
+	int h = ImgOutput.GetFreqHeight(ImgOutput.GetHeight(), FALSE);
+	double* dFilter = new double[w * h];
+	ImgOutput.FreqInvTuihua(dFilter);
+
+	//if (AllocConsole())
+	//{
+	//	freopen("CONOUT$", "w", stdout);
+	//	for (int i = 0; i < h; i += 10)
+	//	{
+	//		for (int j = 0; j < w; j += 10)
+	//		{
+	//			std::cout << int(dFilter[i * w + j] + 0.2) << ' ';
+	//		}
+	//		std::cout << std::endl;
+	//	}
+	//}
+	//FreeConsole();
+
+	ImgOutput.FreqFilter(&ImgOutput, dFilter, 0);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+
+	delete[] dFilter;
+}
+
+void CDIPView::OnInvFilter()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	CDlgInvRad dlg;
+
+	dlg.m_nRad = 75;
+
+	if (dlg.DoModal() != IDOK)
+	{
+		return;
+	}
+
+	int w = ImgOutput.GetFreqWidth(ImgOutput.GetWidthPixel(), FALSE);
+	int h = ImgOutput.GetFreqHeight(ImgOutput.GetHeight(), FALSE);
+	double* dFilter = new double[w * h];
+	ImgInput.FreqInvFilter(dFilter, dlg.m_nRad);
+	ImgInput.FreqFilter(&ImgOutput, dFilter, 0);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+
+	delete[] dFilter;
+}
+
+
+void CDIPView::OnFreqWienerFilter()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	int w = ImgOutput.GetFreqWidth(ImgOutput.GetWidthPixel(), FALSE);
+	int h = ImgOutput.GetFreqHeight(ImgOutput.GetHeight(), FALSE);
+	double* dFilter = new double[w * h];
+	ImgInput.FreqWienerFilter(dFilter, 78, 0.05);
+	ImgInput.FreqFilter(&ImgOutput, dFilter, 0);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+
+	delete[] dFilter;
 }

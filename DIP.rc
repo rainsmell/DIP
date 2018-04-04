@@ -215,7 +215,21 @@ BEGIN
         MENUITEM "傅里叶反变换",                      ID_32793
         MENUITEM SEPARATOR
         MENUITEM "理想低通滤波器",                     ID_32794
-        MENUITEM "高斯滤波器",                       ID_32795
+        MENUITEM "高斯低通滤波器",                     ID_32795
+        MENUITEM SEPARATOR
+        MENUITEM "高斯高通滤波器",                     ID_32796
+        MENUITEM "拉普拉斯滤波器",                     ID_32797
+    END
+    POPUP "图像复原(&G)"
+    BEGIN
+        MENUITEM "均匀噪声",                        ID_32798
+        MENUITEM "高斯噪声",                        ID_32799
+        MENUITEM "椒盐噪声",                        ID_32800
+        MENUITEM "瑞利噪声",                        ID_32801
+        MENUITEM SEPARATOR
+        MENUITEM "图像退化",                        ID_32802
+        MENUITEM "图像逆滤波",                       ID_32803
+        MENUITEM "维纳滤波",                        ID_32804
     END
     POPUP "编辑(&E)"
     BEGIN
@@ -489,6 +503,17 @@ BEGIN
     LTEXT           "Static",IDC_STATIC,89,60,19,8
 END
 
+IDD_DLG_InvRad DIALOGEX 0, 0, 121, 58
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "逆滤波设置"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,7,37,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,64,37,50,14
+    LTEXT           "逆滤波半径：",IDC_STATIC,17,17,49,8
+    EDITTEXT        IDC_EDIT1,65,15,40,14,ES_AUTOHSCROLL
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -640,6 +665,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 169
     END
+
+    IDD_DLG_InvRad, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 114
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 51
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -705,6 +738,11 @@ BEGIN
 END
 
 IDD_DLG_GaussFilter AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_InvRad AFX_DIALOG_LAYOUT
 BEGIN
     0
 END

@@ -191,6 +191,7 @@
     <ClInclude Include="DlgGemoRotate.h" />
     <ClInclude Include="DlgGemoScale.h" />
     <ClInclude Include="DlgHist.h" />
+    <ClInclude Include="DlgInvRad.h" />
     <ClInclude Include="DlgLinerPara.h" />
     <ClInclude Include="DlgLog.h" />
     <ClInclude Include="DlgParLineTran.h" />
@@ -216,6 +217,7 @@
     <ClCompile Include="DlgGemoRotate.cpp" />
     <ClCompile Include="DlgGemoScale.cpp" />
     <ClCompile Include="DlgHist.cpp" />
+    <ClCompile Include="DlgInvRad.cpp" />
     <ClCompile Include="DlgLinerPara.cpp" />
     <ClCompile Include="DlgLog.cpp" />
     <ClCompile Include="DlgParLineTran.cpp" />

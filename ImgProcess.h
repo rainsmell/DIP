@@ -52,6 +52,9 @@ public:
 	void IFFT(std::complex<double>* TD, std::complex<double>* FD, int r);
 	void FFT2(CImgProcess* pTo, BOOL bExpand, std::complex<double>* pOutput, BYTE bFillColor);
 	void IFFT2(CImgProcess* pTo, std::complex<double>* pDFT, int iOutH, int iOutW, int iHeight, int iWidth);
+
+	int GetFreqWidth(int width, BOOLEAN bPadding);
+	int GetFreqHeight(int height, BOOLEAN bPadding);
 	
 	// 频域滤波函数，pdFilter为频域滤波器
 	void FreqFilter(CImgProcess* pTo, double* pdFilter, BYTE fillColor);
@@ -61,6 +64,20 @@ public:
 	
 	// 高斯低通滤波器
 	void FreqGaussLPF(double* pdFilter, int nSigma);
+	// 高斯高通滤波器
+	void FreqGaussHPF(double* pdFilter, int nSigma);
+	// 拉普拉斯滤波器
+	void FreqLaplace(double* pdFilter);
+
+	void AddUniform(CImgProcess* pTo);
+	void AddGaussian(CImgProcess* pTo);
+	void AddSlat_Pepper(CImgProcess* pTo);
+	void AddRayleigh(CImgProcess* pTo);
+
+	void FreqInvTuihua(double* pdFilter);
+	void FreqInvFilter(double* pdFilter, int nRad);
+	void FreqWienerFilter(double* pdFilter, int nRad, double k);
+
 
 	void Threshold(CImgProcess* pTo, BYTE nThres);
 };

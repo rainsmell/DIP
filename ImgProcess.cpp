@@ -53,6 +53,10 @@ float Template_Laplacian2[9] = { -1, -1, -1,
 	-1, -1, -1
 };
 
+float Template_Laplacian3[9] = { 1, 1, 1,
+1, -8, 1,
+1, 1, 1
+};
 
 CImgProcess::CImgProcess()
 {
@@ -522,7 +526,7 @@ void CImgProcess::FilterLaplacian(CImgProcess* pTo)
 	CImgProcess img1;
 	img1 = *pTo;
 
-	Template(&img1, 3, 3, 1, 1, Template_Laplacian2, 1);
+	Template(&img1, 3, 3, 1, 1, Template_Laplacian3, 1);
 	
 	*pTo = img1;
 }
@@ -713,11 +717,9 @@ void CImgProcess::FFT2(CImgProcess* pTo, BOOL bExpand, std::complex<double>* pOu
 		hp++;
 	}
 
-	if ((bExpand) && (w != GetWidthPixel()) && (h != GetHeight()))
-	{
-		w *= 2; wp++;
-		h *= 2; hp++;
-	}
+	if ((bExpand) && (20 < GetWidthPixel() - w)) { w *= 2; wp++; }
+	if ((bExpand) && (20 < GetHeight() - h)) { h *= 2; hp++; }
+		
 
 	std::complex<double>* TD = new std::complex<double>[w * h];
 	std::complex<double>* FD = new std::complex<double>[w * h];
@@ -838,18 +840,34 @@ void CImgProcess::IFFT2(CImgProcess* pTo, std::complex<double>* pDFT, int iOutH,
 	delete[] FD;
 }
 
+int CImgProcess::GetFreqHeight(int nHeight, BOOLEAN bPadding = TRUE)
+{
+	int h = 1;
+	while (h * 2 <= nHeight) h *= 2;
+	if (bPadding && (20 < nHeight - h))
+		h *= 2;
+	return h;
+}
+
+int CImgProcess::GetFreqWidth(int nWidth, BOOLEAN bPadding = TRUE)
+{
+	int w = 1;
+	while (w * 2 <= nWidth) w *= 2;
+	if (bPadding && w != nWidth)
+		w *= 2;
+	return w;
+}
+
 void CImgProcess::FreqFilter(CImgProcess* pTo, double* dpFilter, BYTE fillColor)
 {
 	int w = 1, h = 1;
 
-	while (w * 2 <= GetWidthPixel()) { w *= 2; }
-	//if (w != GetWidthPixel()) w *= 2;
-	while (h * 2 <= GetHeight()) { h *= 2; }
-	//if (h != GetHeight()) h *= 2;
+	w = GetFreqWidth(GetWidthPixel(), FALSE);
+	h = GetFreqHeight(GetHeight(), FALSE);
 
 	std::complex<double>* cdFreqImg = new std::complex<double>[w * h];
 
-	FFT2(NULL, 0, cdFreqImg, fillColor);
+	FFT2(NULL, FALSE, cdFreqImg, fillColor);
 
 	for (int i = 0; i < w * h; i++)
 		cdFreqImg[i] *= dpFilter[i];
@@ -866,8 +884,8 @@ void CImgProcess::FreqIdealLPF(double* dpFilter, int nFreq)
 
 	int w = 1, h = 1;
 
-	while (w * 2 <= GetWidthPixel()) w *= 2;
-	while (h * 2 <= GetHeight()) h *= 2;
+	w = GetFreqWidth(GetWidthPixel(), FALSE);
+	h = GetFreqHeight(GetHeight(), FALSE);
 
 	for (int i = 0; i < h; i++)
 		for (int j = 0; j < w; j++)
@@ -878,32 +896,220 @@ void CImgProcess::FreqIdealLPF(double* dpFilter, int nFreq)
 				//dpFilter[i * w + j] = 1;
 				dpFilter[(i < h / 2 ? i + h / 2 : i - h / 2) * w + (j < w / 2 ? j + w / 2 : j - w / 2)] = 1;
 
-	if (AllocConsole())
-	{
-		freopen("CONOUT$", "w", stdout);
-		for (int i = 0; i < h; i += 10)
-		{
-			for (int j = 0; j < w; j += 10)
-			{
-				std::cout << dpFilter[i * w + j] << ' ';
-			}
-			std::cout << std::endl;
-		}
-	}
-	FreeConsole();
+	
 }
 
 void CImgProcess::FreqGaussLPF(double* dpFilter, int nSigma)
 {
 	int w = 1, h = 1;
 	
-	while (w * 2 <= GetWidthPixel()) w *= 2;
-	while (h * 2 <= GetHeight()) h *= 2;
+	w = GetFreqWidth(GetWidthPixel(), FALSE);
+	h = GetFreqHeight(GetHeight(), FALSE);
 
 	for (int i = 0; i < h; i++)
 		for (int j = 0; j < w; j++)
-			dpFilter[(i < h / 2 ? i + h / 2 : i - h / 2) * w + (j < w / 2 ? j + h / 2 : j - h / 2)] =
+			dpFilter[(i < h / 2 ? i + h / 2 : i - h / 2) * w + (j < w / 2 ? j + w / 2 : j - w / 2)] =
 			exp(-(pow(i - h/2, 2) + pow(j - w/2, 2)) / (2 * pow(nSigma, 2)));
+}
+
+void CImgProcess::FreqGaussHPF(double* dpFilter, int nSigma)
+{
+	int w = 1, h = 1;
+
+	w = GetFreqWidth(GetWidthPixel(), FALSE);
+	h = GetFreqHeight(GetHeight(), FALSE);
+
+	for (int i = 0; i < h; i++)
+		for (int j = 0; j < w; j++)
+			dpFilter[(i < h / 2 ? i + h / 2 : i - h / 2) * w + (j < w / 2 ? j + w / 2 : j - w / 2)] =
+			1 - exp(-(pow(i - h / 2, 2) + pow(j - w / 2, 2)) / (2 * pow(nSigma, 2)));
+}
+
+void CImgProcess::FreqLaplace(double* dpFilter)
+{
+	int w = 1, h = 1;
+
+	w = GetFreqWidth(GetWidthPixel(), FALSE);
+	h = GetFreqHeight(GetHeight(), FALSE);
+
+	for (int i = 0; i < h; i++)
+		for (int j = 0; j < w; j++)
+			dpFilter[(i < h / 2 ? i + h / 2 : i - h / 2) * w + (j < w / 2 ? j + w / 2 : j - w / 2)] =
+			-((pow(i - h / 2, 2) + pow(j - w / 2, 2)));
+}
+
+void CImgProcess::AddUniform(CImgProcess* pTo)
+{
+	double rate = 0.99;
+	int w = pTo->GetWidthPixel();
+	int h = pTo->GetHeight();
+	double lo = -20, hi = 20;
+
+	for (int i = 0; i < h; i++)
+	{
+		for (int j = 0; j < w; j++)
+		{
+			double a0 = double(rand()) / RAND_MAX;
+			if (a0 < rate)
+			{
+				double a1 = double(rand()) / RAND_MAX;
+				a1 *= (hi - lo);
+				a1 += lo;
+				a1 += GetGray(j, i);
+				int it = int(a1 + 0.5);
+				if (it > 255)
+					it = 255;
+				if (it < 0)
+					it = 0;
+				pTo->SetPixel(j, i, RGB(it, it, it));
+			}
+		}
+	}
+}
+
+void CImgProcess::AddGaussian(CImgProcess* pTo)
+{
+	int w = GetWidthPixel();
+	int h = GetHeight();
+	double rate = 0.99;
+
+	for (int i = 0; i < h; i++)
+	{
+		for (int j = 0; j < w; j++)
+		{
+			double a0 = double(rand()) / RAND_MAX;
+			if (a0 < rate)
+			{
+				double a1 = double(rand()) / RAND_MAX;
+				double a2 = double(rand()) / RAND_MAX;
+				double a = sqrt(-2 * log(1 - a1)) * cos(2 * PI * a2);
+				a *= 15;
+				a += GetGray(j, i);
+				int it = int(a + 0.5);
+				if (it > 255)
+					it = 255;
+				if (it < 0)
+					it = 0;
+				pTo->SetPixel(j, i, RGB(it, it, it));
+			}
+		}
+	}
+}
+
+void CImgProcess::AddSlat_Pepper(CImgProcess* pTo)
+{
+	int w = GetWidthPixel();
+	int h = GetHeight();
+
+	double rate = 0.02;
+
+	for (int i = 0; i < h; i++)
+	{
+		for (int j = 0; j < w; j++)
+		{
+			double a0 = double(rand()) / RAND_MAX;
+			if (a0 < rate)
+			{
+				double a1 = double(rand()) / RAND_MAX;
+				if (a1 < 0.5)
+					pTo->SetPixel(j, i, RGB(0, 0, 0));
+				else
+					pTo->SetPixel(j, i, RGB(255, 255, 255));
+			}
+		}
+	}
+}
+
+void CImgProcess::AddRayleigh(CImgProcess* pTo)
+{
+	int w = GetWidthPixel();
+	int h = GetHeight();
+
+	double rate = 0.99;
+
+	for (int i = 0; i < h; i++)
+	{
+		for (int j = 0; j < w; j++)
+		{
+			double a0 = double(rand()) / RAND_MAX;
+			if (a0 < rate)
+			{
+				double a1 = double(rand()) / RAND_MAX;
+				double a2 = double(rand()) / RAND_MAX;
+				double a3 = sqrt(-2 * log(a1)) * cos(2 * PI * a2);
+				double a4 = sqrt(-2 * log(a2)) * cos(2 * PI * a1);
+				a3 *= 15;
+				a4 *= 15;
+				a0 = sqrt(a3 * a3 + a4 * a4);
+				a0 += GetGray(j, i);
+				int gray = int(a0);
+				if (gray > 255)
+					gray = 255;
+				if (gray < 0)
+					gray = 0;
+				pTo->SetPixel(j, i, RGB(gray, gray, gray));
+			}
+		}
+	}
+}
+
+void CImgProcess::FreqInvTuihua(double* dpFilter)
+{
+	int w = GetFreqWidth(GetWidthPixel(), FALSE);
+	int h = GetFreqHeight(GetHeight(), FALSE);
+
+	for (int i = 0; i < h; i++)
+	{
+		for (int j = 0; j < w; j++)
+		{   // f1: 退化函数模型
+			double f1 = ((i - h / 2) * (i - h / 2) + (j - w / 2) * (j - w / 2));
+			f1 = pow(f1, 5.0 / 6);
+			f1 *= -0.0025;
+			f1 = exp(f1);
+			dpFilter[(i < h / 2 ? i + h / 2 : i - h / 2) * w + (j < w / 2 ? j + w / 2 : j - w / 2)] = f1;
+		}
+	}
+}
+
+void CImgProcess::FreqInvFilter(double* dpFilter, int nRad)
+{
+	int w = GetFreqWidth(GetWidthPixel(), FALSE);
+	int h = GetFreqHeight(GetHeight(), FALSE);
+
+	memset(dpFilter, 1.0, sizeof(double) * w * h);
+
+	for (int i = 0; i < h; i++)
+	{
+		for (int j = 0; j < w; j++)
+		{
+			if (sqrt(pow(i - h / 2, 2) + pow(j - w / 2, 2)) <= nRad)
+			{
+				double f1 = ((i - h / 2) * (i - h / 2) + (j - w / 2) * (j - w / 2));
+				f1 = pow(f1, 5.0 / 6);
+				f1 *= -0.0025;
+				f1 = exp(f1);
+				dpFilter[(i < h / 2 ? i + h / 2 : i - h / 2) * w + (j < w / 2 ? j + w / 2 : j - w / 2)] = 1.0 / (f1 + 0.000001);
+			}
+		}
+	}
+}
+
+void CImgProcess::FreqWienerFilter(double* dpFilter, int nRad, double k)
+{
+	int w = GetFreqWidth(GetWidthPixel(), FALSE);
+	int h = GetFreqHeight(GetHeight(), FALSE);
+
+	for (int i = 0; i < h; i++)
+	{
+		for (int j = 0; j < w; j++)
+		{   // f1: 退化函数模型
+			double f1 = ((i - h / 2) * (i - h / 2) + (j - w / 2) * (j - w / 2));
+			f1 = pow(f1, 5.0 / 6);
+			f1 *= -0.0025;
+			f1 = exp(f1);
+			dpFilter[(i < h / 2 ? i + h / 2 : i - h / 2) * w + (j < w / 2 ? j + w / 2 : j - w / 2)] = 1.0 * f1 * f1 / ((f1 * f1 + k) * (f1 + 0.000001));
+		}
+	}
 }
 
 // 双线性插值计算

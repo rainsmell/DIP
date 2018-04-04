@@ -69,6 +69,15 @@ public:
 	afx_msg void OnFreFilterIFFT2();
 	afx_msg void OnFreqIdealLPF();
 	afx_msg void OnFreqGaussFilter();
+	afx_msg void OnFreqGaussHPF();
+	afx_msg void OnFreqLaplace();
+	afx_msg void OnAddUniform();
+	afx_msg void OnAddGaussian();
+	afx_msg void OnAddSlatPepper();
+	afx_msg void OnAddRayleigh();
+	afx_msg void OnInvTuihua();
+	afx_msg void OnInvFilter();
+	afx_msg void OnFreqWienerFilter();
 };
 
 #ifndef _DEBUG  // DIPView.cpp 中的调试版本
