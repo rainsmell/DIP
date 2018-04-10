@@ -6,6 +6,7 @@
 #include <conio.h>
 
 #include <iostream>
+#include <iomanip>
 
 #define PI 3.1415926
 
@@ -57,6 +58,17 @@ float Template_Laplacian3[9] = { 1, 1, 1,
 1, -8, 1,
 1, 1, 1
 };
+
+// DCT量化数组
+int Quant_table[8][8] =
+{ 16,11,10,16,24,40,51,61,
+12,12,14,19,26,58,60,55,
+14,13,16,24,40,57,69,56,
+14,17,22,29,51,87,80,62,
+18,22,37,56,68,109,103,77,
+24,35,55,64,81,104,113,92,
+49,64,78,87,103,121,120,101,
+72,92,95,98,112,100,103,99 };
 
 CImgProcess::CImgProcess()
 {
@@ -1108,6 +1120,601 @@ void CImgProcess::FreqWienerFilter(double* dpFilter, int nRad, double k)
 			f1 *= -0.0025;
 			f1 = exp(f1);
 			dpFilter[(i < h / 2 ? i + h / 2 : i - h / 2) * w + (j < w / 2 ? j + w / 2 : j - w / 2)] = 1.0 * f1 * f1 / ((f1 * f1 + k) * (f1 + 0.000001));
+		}
+	}
+}
+
+void CImgProcess::RGB2CMY(CImgProcess* pTo)
+{
+	int w = GetWidthPixel();
+	int h = GetHeight();
+
+	for (int i = 0; i < h; i++)
+	{
+		for (int j = 0; j < w; j++)
+		{
+			COLORREF rgb = GetPixel(j, i);
+			int r = GetRValue(rgb);
+			int g = GetGValue(rgb);
+			int b = GetBValue(rgb);
+			int c = 255 - r;
+			int m = 255 - g;
+			int y = 255 - b;
+			pTo->SetPixel(j, i, RGB(c, m, y));
+		}
+	}
+}
+
+void CImgProcess::RGB2HSI(CImgProcess* pTo)
+{
+	int nWidth = GetWidthPixel();
+	int nHeight = GetHeight();
+
+	double radians, angle;
+
+	for (int i = 0; i < nHeight; i++)
+	{
+		for (int j = 0; j < nWidth; j++)
+		{
+			COLORREF rgbPixel = GetPixel(j, i);
+			double r = GetRValue(rgbPixel) / 255.0;
+			double g = GetGValue(rgbPixel) / 255.0;
+			double b = GetBValue(rgbPixel) / 255.0;
+
+			double h, s, in;
+			int maxRGB = max(max(r, g), b);
+			int minRGB = min(min(r, g), b);
+
+			in = (r + g + b) / 3;
+
+			if (in < 0.078431)
+				s = 0;
+			else if (in > 0.92)
+				s = 0;
+			else
+				s = 1.0 - 3 / (r + g + b) * minRGB;
+
+			if (minRGB == maxRGB)
+			{
+				h = 0;
+				s = 0;
+			}
+
+			double q1 = ((r - g) + (r - b)) / 2;
+			double q2 = sqrt((r - g) * (r - g) + (r - b) * (g - b));
+			double q = q1 / q2;
+			if (q > 0.99999)
+				radians = 0;
+			else if (q < -0.99999)
+				radians = PI;
+			else
+				radians = acos(q);
+			angle = radians * 180 / PI;
+
+			if (b > g)
+				h = 360.0 - angle;
+			else
+				h = angle;
+
+			in = 255 * in;
+			s = 255 * s;
+			pTo->SetPixel(j, i, RGB(h, s, in));
+		}
+	}
+}
+
+void CImgProcess::HSI2RGB(CImgProcess* pTo)
+{
+	int nHeight = GetHeight();
+	int nWidth = GetWidthPixel();
+	
+	for (int i = 0; i < nHeight; i++)
+	{
+		for (int j = 0; j < nWidth; j++)
+		{
+			COLORREF RGBPixel = GetPixel(j, i);
+			double H = GetRValue(RGBPixel);
+			double S = GetGValue(RGBPixel) * 255.0;
+			double I = GetBValue(RGBPixel) * 255.0;
+			double R, G, B;
+
+			if (H >= 0 && H < 120)
+			{
+				H = H;
+				B = I * (1.0 - S);
+				R = I * (1.0 + ((S * cos(H)) / cos(60 - H)));
+				G = 3.0 * I - R - B;
+			}
+			else if (H >= 120 && H < 240)
+			{
+				H = H - 120;
+				R = I * (1.0 - S);
+				G = I * (1.0 + ((S * cos(H)) / cos(60 - H)));
+				B = 3.0 * I - R - G;
+			}
+			else 
+			{
+				H = H - 240;
+				G = I * (1.0 - S);
+				B = I * (1.0 + ((S * cos(H)) / cos(60 - H)));
+				R = 3.0 * I - B - G;
+			}
+
+			R *= 255.0;
+			G *= 255.0;
+			B *= 255.0;
+
+			pTo->SetPixel(j, i, RGB(R, G, B));
+		}
+	}
+}
+
+void CImgProcess::RGB2HSV(CImgProcess *pTo)
+{
+	int nHeight = GetHeight();
+	int nWidth = GetWidthPixel();
+
+	int i, j;
+
+	for (i = 0; i<nHeight; i++)
+	{
+		for (j = 0; j<nWidth; j++)
+		{
+			COLORREF RGBPixel = GetPixel(j, i);
+			//抽取RGB分量
+			double R = GetRValue(RGBPixel) / 255.0;
+			double G = GetGValue(RGBPixel) / 255.0;
+			double B = GetBValue(RGBPixel) / 255.0;
+
+			//计算HSV
+			double H, S, V, MAX, MIN, TEMP;
+			MAX = max(max(R, G), B);
+			MIN = min(min(R, G), B);
+			V = MAX;
+			TEMP = MAX - MIN;
+
+			if (MAX != 0)
+			{
+				S = TEMP / MAX;
+			}
+			else
+			{
+				S = 0;
+				//H = UNDEFINEDCOLOR;
+				return;
+			}
+			if (R == MAX)
+				H = (G - B) / TEMP;
+			else if (G == MAX)
+				H = 2 + (B - R) / TEMP;
+			else
+				H = 4 + (R - G) / TEMP;
+			H *= 60;
+			if (H < 0)
+				H += 360;
+
+			//将HSV分量化为能在计算机上范围为[0，255]可显示的图像
+			H /= 360.0;
+			H *= 255.0;
+			S *= 255.0;
+			V *= 255.0;
+
+			//将分量联合形成HSV图像
+			pTo->SetPixel(j, i, RGB(H, S, V));
+		}
+	}
+}
+
+void CImgProcess::HSV2RGB(CImgProcess *pTo)
+{
+	int nHeight = GetHeight();
+	int nWidth = GetWidthPixel();
+
+	int i, j;
+
+	for (i = 0; i<nHeight; i++)
+	{
+		for (j = 0; j<nWidth; j++)
+		{
+			COLORREF RGBPixel = GetPixel(j, i);
+			//抽取HSV分量
+			double H = (GetRValue(RGBPixel) / 255.0)*360.0;
+			double S = GetGValue(RGBPixel) / 255.0;
+			double V = GetBValue(RGBPixel) / 255.0;
+
+			//计算RGB
+			double R, G, B, f, p, q, t, TEMP;
+			int n;
+
+			if (S == 0)
+			{
+				R = G = B = V;
+			}
+
+			n = int(floor(H / 60));
+			TEMP = H / 60;
+			f = TEMP - n;
+			p = V*(1 - S);
+			q = V*(1 - f*S);
+			t = V*(1 - (1 - f)*S);
+
+			switch (n)
+			{
+			case 0:
+				R = V;
+				G = t;
+				B = p;
+				break;
+			case 1:
+				R = q;
+				G = V;
+				B = p;
+				break;
+			case 2:
+				R = p;
+				G = V;
+				B = t;
+				break;
+			case 3:
+				R = p;
+				G = q;
+				B = V;
+				break;
+			case 4:
+				R = t;
+				G = p;
+				B = V;
+				break;
+			default:  //case 5:
+				R = V;
+				G = p;
+				B = q;
+				break;
+			}
+
+			R *= 255.0;
+			G *= 255.0;
+			B *= 255.0;
+
+			//将分量联合形成RGB图像
+			pTo->SetPixel(j, i, RGB(R, G, B));
+		}// for j
+	}//for i
+}
+
+void CImgProcess::RGB2YUV(CImgProcess *pTo)
+{
+	int nHeight = GetHeight();
+	int nWidth = GetWidthPixel();
+
+	int i, j;
+
+	for (i = 0; i<nHeight; i++)
+	{
+		for (j = 0; j<nWidth; j++)
+		{
+			COLORREF RGBPixel = GetPixel(j, i);
+			//抽取RGB分量
+			double R = GetRValue(RGBPixel);
+			double G = GetGValue(RGBPixel);
+			double B = GetBValue(RGBPixel);
+
+			//计算YUV
+			double Y, U, V;
+			Y = 0.299*R + 0.587*G + 0.114*B;
+			U = (B - Y)*0.567;
+			V = (R - Y)*0.713;
+
+			//防止溢出
+			if (Y > 255)
+				Y = 255;
+			if (Y < 0)
+				Y = 0;
+			if (U > 255)
+				U = 255;
+			if (U < 0)
+				U = 0;
+			if (V > 255)
+				V = 255;
+			if (V < 0)
+				V = 0;
+
+			//将分量联合形成YUV图像
+			pTo->SetPixel(j, i, RGB(Y, U, V));
+		}//for j
+	}//for i
+}
+
+void CImgProcess::YUV2RGB(CImgProcess *pTo)
+{
+	int nHeight = GetHeight();
+	int nWidth = GetWidthPixel();
+
+	int i, j;
+
+	for (i = 0; i<nHeight; i++)
+	{
+		for (j = 0; j<nWidth; j++)
+		{
+			COLORREF RGBPixel = GetPixel(j, i);
+			//抽取YUV分量
+			double Y = GetRValue(RGBPixel);
+			double U = GetGValue(RGBPixel);
+			double V = GetBValue(RGBPixel);
+
+			//计算RGB
+			double R, G, B;
+			R = Y + 1.402*V;
+			G = Y - 0.344*U - 0.714*V;
+			B = Y + 1.772*U;
+
+			//防止溢出
+			if (R > 255)
+				R = 255;
+			if (R < 0)
+				R = 0;
+			if (G > 255)
+				G = 255;
+			if (G < 0)
+				G = 0;
+			if (B > 255)
+				B = 255;
+			if (B < 0)
+				B = 0;
+
+			//将分量联合形成RGB图像
+			pTo->SetPixel(j, i, RGB(R, G, B));
+		}
+	}
+}
+
+void CImgProcess::RGB2YIQ(CImgProcess *pTo)
+{
+	int nHeight = GetHeight();
+	int nWidth = GetWidthPixel();
+
+	int i, j;
+
+	for (i = 0; i<nHeight; i++)
+	{
+		for (j = 0; j<nWidth; j++)
+		{
+			COLORREF RGBPixel = GetPixel(j, i);
+			//抽取RGB分量
+			double R = GetRValue(RGBPixel);
+			double G = GetGValue(RGBPixel);
+			double B = GetBValue(RGBPixel);
+
+			//计算YUV
+			double Y, I, Q;
+			Y = 0.299*R + 0.587*G + 0.114*B;
+			I = 0.596*R - 0.274*G - 0.322*B;
+			Q = 0.211*R - 0.523*G + 0.312*B;
+
+			//防止溢出
+			if (Y > 255)
+				Y = 255;
+			if (Y < 0)
+				Y = 0;
+			if (I > 255)
+				I = 255;
+			if (I < 0)
+				I = 0;
+			if (Q > 255)
+				Q = 255;
+			if (Q < 0)
+				Q = 0;
+
+			//将分量联合形成YIQ图像
+			pTo->SetPixel(j, i, RGB(Y, I, Q));
+		}
+	}
+}
+
+void CImgProcess::YIQ2RGB(CImgProcess *pTo)
+{
+	int nHeight = GetHeight();
+	int nWidth = GetWidthPixel();
+
+	int i, j;
+
+	for (i = 0; i<nHeight; i++)
+	{
+		for (j = 0; j<nWidth; j++)
+		{
+			COLORREF RGBPixel = GetPixel(j, i);
+			//抽取YIQ分量
+			double Y = GetRValue(RGBPixel);
+			double I = GetGValue(RGBPixel);
+			double Q = GetBValue(RGBPixel);
+
+			//计算RGB
+			double R, G, B;
+			R = Y + 0.956*I + 0.114*Q;
+			G = Y - 0.272*I - 0.647*Q;
+			B = Y - 1.106*I + 1.703*Q;
+
+			//防止溢出
+			if (R > 255)
+				R = 255;
+			if (R < 0)
+				R = 0;
+			if (G > 255)
+				G = 255;
+			if (G < 0)
+				G = 0;
+			if (B > 255)
+				B = 255;
+			if (B < 0)
+				B = 0;
+
+			//将分量联合形成RGB图像
+			pTo->SetPixel(j, i, RGB(R, G, B));
+		}//for j
+	}//for i
+}
+
+void CImgProcess::dct8x8(double* in, double* out)
+{
+	for (int i = 0; i < 8; i++)
+		for (int j = 0; j < 8; j++)
+			in[i * 8 + j] -= 128.0;
+
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			double s = 0.0;
+			for (int m = 0; m < 8; m++)
+				for (int n = 0; n < 8; n++)
+					s += in[m * 8 + n] * cos((2 * m + 1) * PI * i / 16.0) * cos((2 * n + 1) * PI * j / 16.0);
+			out[i * 8 + j] = s / 4;
+			if (i == 0)
+				out[i * 8 + j] /= sqrt(2.0);
+			if (j == 0)
+				out[i * 8 + j] /= sqrt(2.0);		
+		}
+	}
+
+	//if (AllocConsole())
+	//{
+	//	freopen("CONOUT$", "w", stdout);
+	//	for (int m = 0; m < 8; m++)
+	//	{
+	//		for (int n = 0; n < 8; n++)
+	//		{
+	//			std::cout << std::setw(8) << out[m * 8 + n] << " ";
+	//		}
+	//		std::cout << std::endl;
+	//	}
+	//	FreeConsole();
+	//}
+}
+
+void CImgProcess::idct8x8(double* in, double* out)
+{
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			double s = 0;
+			for (int m = 0; m < 8; m++)
+			{
+				for (int n = 0; n < 8; n++)
+				{
+					double f = in[m * 8 + n] * cos((2 * i + 1) * m * PI / 16.0) * cos((2 * j + 1) * n * PI / 16.0);
+					if (m == 0)
+						f /= sqrt(2.0);
+					if (n == 0)
+						f /= sqrt(2.0);
+					s += f;
+				}
+			}
+			out[i * 8 + j] = s / 4;
+		}
+	}
+
+	for (int i = 0; i < 8; i++)
+		for (int j = 0; j < 8; j++)
+			out[i * 8 + j] += 128.0;
+}
+
+void CImgProcess::quant(double* in, int* out)
+{
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			double s = in[i * 8 + j] / Quant_table[i][j];
+			if (in[i * 8 + j] >= 0)
+				out[i * 8 + j] = int(floor(s + 0.5));
+			else
+				out[i * 8 + j] = int(ceil(s - 0.5));
+			if (out[i * 8 + j] < -128)
+				out[i * 8 + j] = -128;
+			if (out[i * 8 + j] > 127)
+				out[i * 8 + j] = 127;
+		}
+	}
+
+	//if (AllocConsole())
+	//{
+	//	freopen("CONOUT$", "w", stdout);
+	//	for (int m = 0; m < 8; m++)
+	//	{
+	//		for (int n = 0; n < 8; n++)
+	//		{
+	//			std::cout << std::setw(8) << out[m * 8 + n] << " ";
+	//		}
+	//		std::cout << std::endl;
+	//	}
+	//	FreeConsole();
+	//}
+}
+
+void CImgProcess::iquant(int* in, double* out)
+{
+	for (int i = 0; i < 8; i++)
+		for (int j = 0; j < 8; j++)
+			out[i * 8 + j] = in[i * 8 + j] * double(Quant_table[i][j]);
+}
+
+void CImgProcess::DCT_ALL(CImgProcess* pTo)
+{
+	int nHeight = GetHeight() / 8;
+	int nWidth = GetWidthPixel() / 8;
+
+	for (int i = 0; i < nHeight; i++)
+	{
+		for (int j = 0; j < nWidth; j++)
+		{
+			double din[64], dout[64];
+			int iout[64];
+			for (int m = 0; m < 8; m++)
+				for (int n = 0; n < 8; n++)
+					din[m * 8 + n] = double(GetGray(j * 8 + n, i * 8 + m));
+			dct8x8(din, dout);
+			quant(dout, iout);
+
+			for (int m = 0; m < 8; m++)
+				for (int n = 0; n < 8; n++)
+				{
+					unsigned char t = (unsigned char)(iout[m * 8 + n] + 50);
+					pTo->SetPixel(j * 8 + n, i * 8 + m, RGB(t, t, t));
+				}
+		}
+	}
+}
+
+void CImgProcess::IDCT_ALL(CImgProcess* pTo)
+{
+	int nHeight = GetHeight() / 8;
+	int nWidth = GetWidthPixel() / 8;
+
+	for (int i = 0; i < nHeight; i++)
+	{
+		for (int j = 0; j < nWidth; j++)
+		{
+			double dout[64], dout1[64];
+			int iin[64];
+			for (int m = 0; m < 8; m++)
+				for (int n = 0; n < 8; n++)
+					iin[m * 8 + n] = GetGray(j * 8 + n, i * 8 + m) - 50;
+
+			iquant(iin, dout);
+			idct8x8(dout, dout1);
+
+			for (int m = 0; m < 8; m++)
+				for (int n = 0; n < 8; n++)
+				{
+					double d = dout1[m * 8 + n];
+					if (d < 0)
+						d = 0;
+					if (d > 254.5)
+						d = 254.0;
+					unsigned char t = (unsigned char)(int)(d + 0.5);
+					pTo->SetPixel(j * 8 + n, i * 8 + m, RGB(d, d, d));
+				}
 		}
 	}
 }

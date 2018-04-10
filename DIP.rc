@@ -231,6 +231,25 @@ BEGIN
         MENUITEM "Í¼ÏñÄæÂË²¨",                       ID_32803
         MENUITEM "Î¬ÄÉÂË²¨",                        ID_32804
     END
+    POPUP "²ÊÉ«Ä£ÐÍ(&C)"
+    BEGIN
+        MENUITEM "RGB2CMY",                     ID_32805
+        MENUITEM "RGB2HSI",                     ID_32806
+        MENUITEM "HSI2RGB",                     ID_32807
+        MENUITEM "RGB2HSV",                     ID_32808
+        MENUITEM "HSV2RGB",                     ID_32809
+        MENUITEM "RGB2YUV",                     ID_32810
+        MENUITEM "YUV2RGB",                     ID_32811
+        MENUITEM "RGB2YIQ",                     ID_32812
+        MENUITEM "YIQ2RGB",                     ID_32813
+    END
+    POPUP "Í¼ÏñÑ¹Ëõ(&S)"
+    BEGIN
+        MENUITEM "DCT±ä»» && Á¿»¯",                 ID_32814
+        MENUITEM "·´Á¿»¯ && IDTC±ä»»",               ID_32815
+        MENUITEM SEPARATOR
+        MENUITEM "»ô·òÂü±àÂë",                       ID_32816
+    END
     POPUP "±à¼­(&E)"
     BEGIN
         MENUITEM "³·Ïû(&U)\tCtrl+Z",              ID_EDIT_UNDO
@@ -514,6 +533,23 @@ BEGIN
     EDITTEXT        IDC_EDIT1,65,15,40,14,ES_AUTOHSCROLL
 END
 
+IDD_DLG_Huffman DIALOGEX 0, 0, 309, 176
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "»ô·òÂü±àÂë²âÊÔ"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,198,155,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,252,155,50,14
+    EDITTEXT        IDC_EDIT_INPUT,60,31,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_OUTPUT,58,67,40,14,ES_AUTOHSCROLL
+    LTEXT           "ÊäÈëÎÄ¼þ£º",IDC_STATIC,61,15,41,8
+    LTEXT           "Êä³öÎÄ¼þ£º",IDC_STATIC,60,55,41,8
+    PUSHBUTTON      "ä¯ÀÀ",IDC_BTN_INPUT,113,32,50,14
+    PUSHBUTTON      "ä¯ÀÀ",IDC_BTN_OUTPUT,113,67,50,14
+    PUSHBUTTON      "±àÂë",IDC_BTN_ENCODE,48,97,50,14
+    PUSHBUTTON      "½âÂë",IDC_BTN_DECODE,113,98,50,14
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -673,6 +709,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 51
     END
+
+    IDD_DLG_Huffman, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 169
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -743,6 +787,11 @@ BEGIN
 END
 
 IDD_DLG_InvRad AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_Huffman AFX_DIALOG_LAYOUT
 BEGIN
     0
 END

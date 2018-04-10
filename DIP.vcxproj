@@ -191,6 +191,7 @@
     <ClInclude Include="DlgGemoRotate.h" />
     <ClInclude Include="DlgGemoScale.h" />
     <ClInclude Include="DlgHist.h" />
+    <ClInclude Include="DlgHuffman.h" />
     <ClInclude Include="DlgInvRad.h" />
     <ClInclude Include="DlgLinerPara.h" />
     <ClInclude Include="DlgLog.h" />
@@ -198,6 +199,7 @@
     <ClInclude Include="DlgSmoothConfig.h" />
     <ClInclude Include="DlgThreshold.h" />
     <ClInclude Include="GeomMove.h" />
+    <ClInclude Include="Huffman.h" />
     <ClInclude Include="Img.h" />
     <ClInclude Include="ImgProcess.h" />
     <ClInclude Include="MainFrm.h" />
@@ -217,6 +219,7 @@
     <ClCompile Include="DlgGemoRotate.cpp" />
     <ClCompile Include="DlgGemoScale.cpp" />
     <ClCompile Include="DlgHist.cpp" />
+    <ClCompile Include="DlgHuffman.cpp" />
     <ClCompile Include="DlgInvRad.cpp" />
     <ClCompile Include="DlgLinerPara.cpp" />
     <ClCompile Include="DlgLog.cpp" />
@@ -224,6 +227,7 @@
     <ClCompile Include="DlgSmoothConfig.cpp" />
     <ClCompile Include="DlgThreshold.cpp" />
     <ClCompile Include="GeomMove.cpp" />
+    <ClCompile Include="Huffman.cpp" />
     <ClCompile Include="Img.cpp" />
     <ClCompile Include="ImgProcess.cpp" />
     <ClCompile Include="MainFrm.cpp" />

@@ -31,6 +31,7 @@
 #define IDD_DLG_LPF                     330
 #define IDD_DLG_GaussFilter             332
 #define IDD_DLG_InvRad                  334
+#define IDD_DLG_Huffman                 338
 #define IDC_HIST                        1000
 #define IDC_EDIT1                       1001
 #define IDC_EDIT_A                      1001
@@ -57,11 +58,18 @@
 #define IDC_EDIT_V3                     1022
 #define IDC_EDIT_V4                     1023
 #define IDC_EDIT_V5                     1024
+#define IDC_BTN_INPUT                   1024
 #define IDC_EDIT_V6                     1025
+#define IDC_BTN_OUTPUT                  1025
 #define IDC_EDIT_V7                     1026
+#define IDC_EDIT_INPUT                  1026
 #define IDC_EDIT_V8                     1027
+#define IDC_EDIT_OUTPUT                 1027
 #define IDC_EDIT_V9                     1028
+#define IDC_BTN_ENCODE                  1028
 #define IDC_EDIT_V10                    1029
+#define IDC_BUTTON4                     1029
+#define IDC_BTN_DECODE                  1029
 #define IDC_EDIT_V11                    1030
 #define IDC_EDIT_V12                    1031
 #define IDC_EDIT_V13                    1032
@@ -110,14 +118,26 @@
 #define ID_32802                        32802
 #define ID_32803                        32803
 #define ID_32804                        32804
+#define ID_32805                        32805
+#define ID_32806                        32806
+#define ID_32807                        32807
+#define ID_32808                        32808
+#define ID_32809                        32809
+#define ID_32810                        32810
+#define ID_32811                        32811
+#define ID_32812                        32812
+#define ID_32813                        32813
+#define ID_32814                        32814
+#define ID_32815                        32815
+#define ID_32816                        32816
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        336
-#define _APS_NEXT_COMMAND_VALUE         32805
-#define _APS_NEXT_CONTROL_VALUE         1024
+#define _APS_NEXT_RESOURCE_VALUE        340
+#define _APS_NEXT_COMMAND_VALUE         32817
+#define _APS_NEXT_CONTROL_VALUE         1030
 #define _APS_NEXT_SYMED_VALUE           310
 #endif
 #endif

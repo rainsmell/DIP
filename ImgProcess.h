@@ -78,6 +78,23 @@ public:
 	void FreqInvFilter(double* pdFilter, int nRad);
 	void FreqWienerFilter(double* pdFilter, int nRad, double k);
 
+	void RGB2CMY(CImgProcess* pTo);
+	void RGB2HSI(CImgProcess* pTo);
+	void HSI2RGB(CImgProcess* pTo);
+	void HSV2RGB(CImgProcess *pTo);
+	void RGB2HSV(CImgProcess *pTo);
+	void YUV2RGB(CImgProcess *pTo);
+	void RGB2YUV(CImgProcess *pTo);
+	void YIQ2RGB(CImgProcess *pTo);
+	void RGB2YIQ(CImgProcess *pTo);
+
+	// ÕºœÒ—πÀıœ‡πÿÀ„∑®
+	void dct8x8(double* in, double* out);
+	void idct8x8(double* in, double* out);
+	void quant(double* in, int* out);
+	void iquant(int* in, double* out);
+	void DCT_ALL(CImgProcess* pTo);
+	void IDCT_ALL(CImgProcess* pTo);
 
 	void Threshold(CImgProcess* pTo, BYTE nThres);
 };

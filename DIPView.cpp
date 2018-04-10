@@ -24,6 +24,7 @@
 #include "DlgFreqLPF.h"
 #include "DlgGaussFilter.h"
 #include "DlgInvRad.h"
+#include "DlgHuffman.h"
 
 #include <iostream>
 
@@ -77,6 +78,18 @@ BEGIN_MESSAGE_MAP(CDIPView, CView)
 	ON_COMMAND(ID_32802, &CDIPView::OnInvTuihua)
 	ON_COMMAND(ID_32803, &CDIPView::OnInvFilter)
 	ON_COMMAND(ID_32804, &CDIPView::OnFreqWienerFilter)
+	ON_COMMAND(ID_32805, &CDIPView::OnColorRGB2CMY)
+	ON_COMMAND(ID_32806, &CDIPView::OnColorRGB2HSI)
+	ON_COMMAND(ID_32807, &CDIPView::OnColorHSI2RGB)
+	ON_COMMAND(ID_32808, &CDIPView::OnColorRGB2HSV)
+	ON_COMMAND(ID_32809, &CDIPView::OnColorHSV2RGB)
+	ON_COMMAND(ID_32810, &CDIPView::OnColorRGB2YUV)
+	ON_COMMAND(ID_32811, &CDIPView::OnColorYUV2RGB)
+	ON_COMMAND(ID_32812, &CDIPView::OnColorRGB2YIQ)
+	ON_COMMAND(ID_32813, &CDIPView::OnColorYIQ2RGB)
+	ON_COMMAND(ID_32814, &CDIPView::OnDctAll)
+	ON_COMMAND(ID_32815, &CDIPView::OnIdctAll)
+	ON_COMMAND(ID_32816, &CDIPView::OnHuffcode)
 END_MESSAGE_MAP()
 
 // CDIPView 构造/析构
@@ -1285,4 +1298,281 @@ void CDIPView::OnFreqWienerFilter()
 	pDoc->UpdateAllViews(NULL);
 
 	delete[] dFilter;
+}
+
+
+void CDIPView::OnColorRGB2CMY()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.RGB2CMY(&ImgOutput);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnColorRGB2HSI()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.RGB2HSI(&ImgOutput);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnColorHSI2RGB()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.HSI2RGB(&ImgOutput);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnColorRGB2HSV()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.RGB2HSV(&ImgOutput);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnColorHSV2RGB()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.HSV2RGB(&ImgOutput);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnColorRGB2YUV()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.RGB2YUV(&ImgOutput);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnColorYUV2RGB()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.YUV2RGB(&ImgOutput);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnColorRGB2YIQ()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.RGB2YIQ(&ImgOutput);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnColorYIQ2RGB()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.YIQ2RGB(&ImgOutput);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnDctAll()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	if (ImgInput.GetHeight() % 8 != 0 || ImgInput.GetWidthPixel() % 8 != 0)
+	{
+		AfxMessageBox(L"图像宽高不是8的整数倍，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.DCT_ALL(&ImgOutput);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnIdctAll()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	if (ImgInput.GetHeight() % 8 != 0 || ImgInput.GetWidthPixel() % 8 != 0)
+	{
+		AfxMessageBox(L"图像宽高不是8的整数倍，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	ImgInput.IDCT_ALL(&ImgOutput);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnHuffcode()
+{
+	// TODO: Add your command handler code here
+	CDlgHuffman dlg;
+
+	dlg.DoModal();
 }

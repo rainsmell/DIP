@@ -78,6 +78,18 @@ public:
 	afx_msg void OnInvTuihua();
 	afx_msg void OnInvFilter();
 	afx_msg void OnFreqWienerFilter();
+	afx_msg void OnColorRGB2CMY();
+	afx_msg void OnColorRGB2HSI();
+	afx_msg void OnColorHSI2RGB();
+	afx_msg void OnColorRGB2HSV();
+	afx_msg void OnColorHSV2RGB();
+	afx_msg void OnColorRGB2YUV();
+	afx_msg void OnColorYUV2RGB();
+	afx_msg void OnColorRGB2YIQ();
+	afx_msg void OnColorYIQ2RGB();
+	afx_msg void OnDctAll();
+	afx_msg void OnIdctAll();
+	afx_msg void OnHuffcode();
 };
 
 #ifndef _DEBUG  // DIPView.cpp 中的调试版本
