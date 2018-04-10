@@ -107,7 +107,7 @@ void CDlgHuffman::OnClickedBtnEncode()
 
 	UpdateData(false);
 	CString info;
-	info.Format(L"霍夫曼编码结束！输出文件：%s\n", T2A(m_sOutputPath));//second
+	info.Format(L"霍夫曼编码结束！输出文件：%s\n", m_sOutputPath);//second
 	AfxMessageBox(info);
 }
 
@@ -115,4 +115,34 @@ void CDlgHuffman::OnClickedBtnEncode()
 void CDlgHuffman::OnClickedBtnDecode()
 {
 	// TODO: Add your control notification handler code here
+	FILE* fpInput, *fpOutput;
+	if (m_sInputPath.Right(3) != "huf")
+	{
+		AfxMessageBox(L"输入文件应为(*.huf)文件!\n");
+		return;
+	}
+	USES_CONVERSION;
+	if ((fpInput = fopen(T2A(m_sInputPath), "rb")) == NULL)
+	{
+		AfxMessageBox(L"输入文件打不开!\n");
+		return;
+	}
+
+	if ((fpOutput = fopen(T2A(m_sOutputPath), "wb")) == NULL)
+	{
+		AfxMessageBox(L"输出文件无法创建!\n");
+		return;
+	}
+
+	huffcode.SetInputFile(fpInput);
+	huffcode.SetOutputFile(fpOutput);
+	huffcode.DecodeFile();
+
+	fclose(fpInput);
+	fclose(fpOutput);
+
+	UpdateData(false);
+	CString info;
+	info.Format(L"霍夫曼解码结束！输出文件：%s\n", m_sOutputPath);//second
+	AfxMessageBox(info);
 }

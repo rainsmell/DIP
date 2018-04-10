@@ -19,7 +19,7 @@ void HuffCode::BuildTree()
 	xInit_Tree();
 
 	// 统计原文件各个字符出现数量
-	char c = 0;
+	unsigned char c = 0; // 这里使用unsigned是必须的，扩展ascii包含256个字符，对于8-bit图像也包含255级灰度
 	m_nRawFileLen = 0;
 	while (!feof(m_fpInFile))
 	{
@@ -31,13 +31,14 @@ void HuffCode::BuildTree()
 	m_nRawFileLen--;
 
 	// 按数量从大到小排序
-	for (int i = 0; i < N_Node / 2; i++)
+	HuffNode tmp;
+	for (int i = 0; i < 255; i++)
 	{
-		for (int j = i + 1; j < N_Node / 2 + 1; j++)
+		for (int j = i + 1; j < 256; j++)
 		{
 			if (m_HTree[j].count > m_HTree[i].count)
 			{
-				HuffNode tmp = m_HTree[j];
+				tmp = m_HTree[j];
 				m_HTree[j] = m_HTree[i];
 				m_HTree[i] = tmp;
 			}
@@ -47,14 +48,16 @@ void HuffCode::BuildTree()
 	// 统计被使用的字符数
 	m_nUsedChar = 0;
 	for (int i = 0; i < N_Node / 2; i++)
-		if (m_HTree[i].count == 0)
+		if (m_HTree[i].count != 0)
 			m_nUsedChar++;
 		else
 			break;
+	
+	int m = m_nUsedChar * 2 - 1; // 编码树的规模
+	m_nUsedChar--; // 从0开始
 
 	// 构建霍夫曼编码树
 	unsigned int min_count;
-	int m = N_Node - 1; // 编码树的规模
 	int min_index;
 	for (int i = m_nUsedChar + 1; i < m; i++)
 	{
@@ -90,28 +93,33 @@ void HuffCode::BuildTree()
 	}
 
 	// 为字符编码
-	for (int i = 0; i < m_nUsedChar; i++)
+	for (int i = 0; i <= m_nUsedChar; i++)
 	{
 		int k = i;
-		m_HTree[0].bits[0] = 0;
+		m_HTree[i].bits[0] = 0;
 
 		while (m_HTree[k].parent != -1)
 		{
 			int j = k;
 			k = m_HTree[k].parent;
 
-			j = strlen(m_HTree[i].bits);
-			memmove(&m_HTree[i].bits[1], &m_HTree[i].bits[0], j + 1); // 包含'/0'
-
 			if (m_HTree[k].lchild == j)
+			{
+				j = strlen(m_HTree[i].bits);
+				memmove(m_HTree[i].bits + 1, m_HTree[i].bits, j + 1); // 包含'/0'
 				m_HTree[i].bits[0] = '0';
+			}
 			else
+			{
+				j = strlen(m_HTree[i].bits);
+				memmove(m_HTree[i].bits + 1, m_HTree[i].bits, j + 1); // 包含'/0'
 				m_HTree[i].bits[0] = '1';
+			}
 		}
 	}
 
 	m_nMaxCodeLen = 0;
-	for (int i = 0; i < m_nUsedChar; i++)
+	for (int i = 0; i <= m_nUsedChar; i++)
 		if (m_nMaxCodeLen < strlen(m_HTree[i].bits))
 			m_nMaxCodeLen = strlen(m_HTree[i].bits);
 }
@@ -126,14 +134,14 @@ int HuffCode::EncodeFile()
 	fwrite(&m_nUsedChar, sizeof(unsigned int), 1, m_fpOutFile);
 	fwrite(&m_nMaxCodeLen, sizeof(unsigned int), 1, m_fpOutFile);
 
-	for (int i = 0; i < m_nUsedChar; i++)
+	for (int i = 0; i <= m_nUsedChar; i++)
 	{
 		fwrite(&m_HTree[i].c, 1, 1, m_fpOutFile);
 		fwrite(m_HTree[i].bits, m_nMaxCodeLen, 1, m_fpOutFile);
 	}
 
 	char buffer[N_Node];
-	char c;
+	int c; // fgetc返回int
 	int j = 0, k = 0;
 	unsigned int n_wr = 12 + (m_nMaxCodeLen + 1) * (m_nUsedChar + 1);
 
@@ -145,19 +153,25 @@ int HuffCode::EncodeFile()
 		int i;
 		j++;
 
-		for (i = 0; i < m_nUsedChar; i++)
-			if (m_HTree[i].c == c) break;
-
+		for (i = 0; i <= m_nUsedChar; i++)
+		{
+			if (m_HTree[i].c == c)
+				break;
+		}
 		strcat(buffer, m_HTree[i].bits);
 
 		k = strlen(buffer);
+		c = 0;
 		while (k >= 8)
 		{
 			for (i = 0; i < 8; i++)
+			{
 				if (buffer[i] == '1')
 					c = (c << 1) | 0x01;
 				else
 					c = c << 1;
+			}
+				
 			fwrite(&c, 1, 1, m_fpOutFile);
 			n_wr++;
 			strcpy(buffer, buffer + 8);
@@ -171,10 +185,13 @@ int HuffCode::EncodeFile()
 	{
 		strcat(buffer, "00000000");
 		for (int i = 0; i < 8; i++)
+		{
 			if (buffer[i] == '1')
 				c = (c << 1) | 0x01;
 			else
 				c = c << 1;
+		}
+			
 		n_wr++;
 		fwrite(&c, 1, 1, m_fpOutFile);
 	}
