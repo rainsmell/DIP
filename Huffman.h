@@ -22,6 +22,7 @@ public:
 
 	void SetInputFile(FILE* in) { m_fpInFile = in; }
 	void SetOutputFile(FILE* out) { m_fpOutFile = out; }
+	double GetCodeRate() { return double(m_nCompressFileLen) / (double)(m_nRawFileLen); }
 
 	void BuildTree();
 

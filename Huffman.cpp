@@ -10,6 +10,7 @@ void HuffCode::xInit_Tree()
 		m_HTree[i].rchild = -1;
 		m_HTree[i].count = 0;
 		m_HTree[i].c = (unsigned char)i;
+		memset(m_HTree[i].bits, '\0', 256);
 	}
 }
 
@@ -209,17 +210,17 @@ int HuffCode::DecodeFile()
 	m_nCompressFileLen = ftell(m_fpInFile);
 	fseek(m_fpInFile, 0, 0);
 
-	fread(&m_nRawFileLen, 1, 1, m_fpInFile);
-	fread(&m_nUsedChar, 1, 1, m_fpInFile);
-	fread(&m_nMaxCodeLen, 1, 1, m_fpInFile);
+	fread(&m_nRawFileLen, sizeof(unsigned int), 1, m_fpInFile);
+	fread(&m_nUsedChar, sizeof(unsigned int), 1, m_fpInFile);
+	fread(&m_nMaxCodeLen, sizeof(unsigned int), 1, m_fpInFile);
 
-	for (int i = 0; i < m_nUsedChar; i++)
+	for (int i = 0; i <= m_nUsedChar; i++)
 	{
 		fread(&m_HTree[i].c, sizeof(unsigned char), 1, m_fpInFile);
-		fread(m_HTree[i].bits, m_nMaxCodeLen, 1, m_fpInFile);
+		fread(&m_HTree[i].bits, m_nMaxCodeLen, 1, m_fpInFile);
 	}
 
-	char c;
+	unsigned char c;
 	char buffer[256];
 	char digital_num[256];
 	int nOutChar = 0;
@@ -234,17 +235,19 @@ int HuffCode::DecodeFile()
 			int num = c;
 			_itoa_s(num, digital_num, 2);
 			int k = strlen(digital_num);
-			for (int l = 8; l > k; l++)
+			for (int l = 8; l > k; l--)
 				strcat(buffer, "0");
 			strcat(buffer, digital_num);
 		}
 
 		int i;
-		for (i = 0; i < m_nUsedChar; i++)
-			if (memcmp(m_HTree[i].bits, buffer, strlen(m_HTree[i].bits)))
+		for (i = 0; i <= m_nUsedChar; i++)
+		{
+			if (memcmp(m_HTree[i].bits, buffer, strlen(m_HTree[i].bits)) == 0)
 				break;
+		}
 
-		strcpy(buffer, buffer + sizeof(m_HTree[i].bits));
+		strcpy(buffer, buffer + strlen(m_HTree[i].bits));
 		c = m_HTree[i].c;
 		m_HTree[i].count++;
 		fwrite(&c, 1, 1, m_fpOutFile);

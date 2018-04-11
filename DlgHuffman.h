@@ -19,6 +19,7 @@ public:
 #endif
 
 private:
+	void update();
 	HuffCode huffcode;
 
 protected:
@@ -32,4 +33,7 @@ public:
 	afx_msg void OnClickedBtnOutput();
 	afx_msg void OnClickedBtnEncode();
 	afx_msg void OnClickedBtnDecode();
+	double m_dEntropy;
+	double m_dAverCodeLen;
+	double m_dRate;
 };

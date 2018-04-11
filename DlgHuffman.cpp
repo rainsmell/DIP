@@ -15,6 +15,9 @@ CDlgHuffman::CDlgHuffman(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_DLG_Huffman, pParent)
 	, m_sInputPath(_T(""))
 	, m_sOutputPath(_T(""))
+	, m_dEntropy(0)
+	, m_dAverCodeLen(0)
+	, m_dRate(0)
 {
 
 }
@@ -28,6 +31,9 @@ void CDlgHuffman::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Text(pDX, IDC_EDIT_INPUT, m_sInputPath);
 	DDX_Text(pDX, IDC_EDIT_OUTPUT, m_sOutputPath);
+	DDX_Text(pDX, IDC_EDIT1, m_dEntropy);
+	DDX_Text(pDX, IDC_EDIT2, m_dAverCodeLen);
+	DDX_Text(pDX, IDC_EDIT3, m_dRate);
 }
 
 
@@ -141,8 +147,17 @@ void CDlgHuffman::OnClickedBtnDecode()
 	fclose(fpInput);
 	fclose(fpOutput);
 
+	update();
+
 	UpdateData(false);
 	CString info;
 	info.Format(L"霍夫曼解码结束！输出文件：%s\n", m_sOutputPath);//second
 	AfxMessageBox(info);
+}
+
+void CDlgHuffman::update()
+{
+	m_dAverCodeLen = huffcode.GetAverCodeLen();
+	m_dRate = huffcode.GetCodeRate();
+	m_dEntropy = huffcode.GetRawFileEntropy();
 }
