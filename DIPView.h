@@ -90,6 +90,14 @@ public:
 	afx_msg void OnDctAll();
 	afx_msg void OnIdctAll();
 	afx_msg void OnHuffcode();
+	afx_msg void OnErode();
+	afx_msg void OnDilate();
+	afx_msg void OnMorphOpen();
+	afx_msg void OnMorphClose();
+	afx_msg void OnGetEdge();
+	afx_msg void OnConvex();
+	afx_msg void OnThining();
+	afx_msg void OnLabelConnRgn();
 };
 
 #ifndef _DEBUG  // DIPView.cpp 中的调试版本

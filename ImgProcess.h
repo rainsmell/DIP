@@ -96,6 +96,15 @@ public:
 	void DCT_ALL(CImgProcess* pTo);
 	void IDCT_ALL(CImgProcess* pTo);
 
+	void Erode(CImgProcess* pTo, int se[3][3]);
+	void Dilate(CImgProcess* pTo, int se[3][3]);
+	void Open(CImgProcess* pTo, int se[3][3]);
+	void Close(CImgProcess* pTo, int se[3][3]);
+
+	void LabelConnRgn(CImgProcess* pTo, int nConn);
+	void Thining(CImgProcess* pTo);
+	void Convex(CImgProcess* pTo, BOOL constrain);
+
 	void Threshold(CImgProcess* pTo, BYTE nThres);
 };
 

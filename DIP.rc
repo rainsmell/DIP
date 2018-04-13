@@ -250,6 +250,20 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "霍夫曼编码",                       ID_32816
     END
+    POPUP "形态学变换"
+    BEGIN
+        MENUITEM "腐蚀",                          ID_32817
+        MENUITEM "膨胀",                          ID_32818
+        MENUITEM SEPARATOR
+        MENUITEM "开运算",                         ID_32819
+        MENUITEM "闭运算",                         ID_32820
+        MENUITEM SEPARATOR
+        MENUITEM "边界提取",                        ID_32821
+        MENUITEM "连通分量",                        ID_32824
+        MENUITEM "细化",                          ID_32823
+        MENUITEM "凸包",                          ID_32822
+    END
+    MENUITEM SEPARATOR
     POPUP "编辑(&E)"
     BEGIN
         MENUITEM "撤消(&U)\tCtrl+Z",              ID_EDIT_UNDO

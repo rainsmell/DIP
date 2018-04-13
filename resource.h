@@ -68,7 +68,6 @@
 #define IDC_EDIT_V9                     1028
 #define IDC_BTN_ENCODE                  1028
 #define IDC_EDIT_V10                    1029
-#define IDC_BUTTON4                     1029
 #define IDC_BTN_DECODE                  1029
 #define IDC_EDIT_V11                    1030
 #define IDC_EDIT_V12                    1031
@@ -130,13 +129,21 @@
 #define ID_32814                        32814
 #define ID_32815                        32815
 #define ID_32816                        32816
+#define ID_32817                        32817
+#define ID_32818                        32818
+#define ID_32819                        32819
+#define ID_32820                        32820
+#define ID_32821                        32821
+#define ID_32822                        32822
+#define ID_32823                        32823
+#define ID_32824                        32824
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        340
-#define _APS_NEXT_COMMAND_VALUE         32817
+#define _APS_NEXT_COMMAND_VALUE         32825
 #define _APS_NEXT_CONTROL_VALUE         1030
 #define _APS_NEXT_SYMED_VALUE           310
 #endif

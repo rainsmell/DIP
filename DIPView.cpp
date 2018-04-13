@@ -90,6 +90,14 @@ BEGIN_MESSAGE_MAP(CDIPView, CView)
 	ON_COMMAND(ID_32814, &CDIPView::OnDctAll)
 	ON_COMMAND(ID_32815, &CDIPView::OnIdctAll)
 	ON_COMMAND(ID_32816, &CDIPView::OnHuffcode)
+	ON_COMMAND(ID_32817, &CDIPView::OnErode)
+	ON_COMMAND(ID_32818, &CDIPView::OnDilate)
+	ON_COMMAND(ID_32819, &CDIPView::OnMorphOpen)
+	ON_COMMAND(ID_32820, &CDIPView::OnMorphClose)
+	ON_COMMAND(ID_32821, &CDIPView::OnGetEdge)
+	ON_COMMAND(ID_32822, &CDIPView::OnConvex)
+	ON_COMMAND(ID_32823, &CDIPView::OnThining)
+	ON_COMMAND(ID_32824, &CDIPView::OnLabelConnRgn)
 END_MESSAGE_MAP()
 
 // CDIPView 构造/析构
@@ -1575,4 +1583,261 @@ void CDIPView::OnHuffcode()
 	CDlgHuffman dlg;
 
 	dlg.DoModal();
+}
+
+
+void CDIPView::OnErode()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	int kernel[3][3] = { 1,1,1,
+		1,1,1,
+		1,1,1, };
+
+	ImgInput.Erode(&ImgOutput, kernel);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnDilate()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	int kernel[3][3] = { 1,1,1,
+		1,1,1,
+		1,1,1, };
+
+	ImgInput.Dilate(&ImgOutput, kernel);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnMorphOpen()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	int kernel[3][3] = { 1,1,1,
+		1,1,1,
+		1,1,1, };
+
+	ImgInput.Open(&ImgOutput, kernel);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnMorphClose()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	int kernel[3][3] = { 1,1,1,
+		1,1,1,
+		1,1,1, };
+
+	ImgInput.Close(&ImgOutput, kernel);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnGetEdge()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	int kernel[3][3] = { 1,1,1,
+		1,1,1,
+		1,1,1, };
+
+	ImgInput.Erode(&ImgOutput, kernel);
+
+	CImgProcess ImgEdge = *(CImgProcess*)&(ImgOutput - ImgInput);
+
+	pDoc->m_Image = ImgEdge;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnConvex()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgInvert = *(CImgProcess *)&(!ImgInput);
+	CImgProcess ImgOutput = ImgInvert;
+
+	ImgInvert.Convex(&ImgOutput, true);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnThining()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgInvert = *(CImgProcess *)&(!ImgInput);
+	CImgProcess ImgOutput = ImgInvert;
+
+	ImgInvert.Thining(&ImgOutput);
+
+	pDoc->m_Image = ImgInvert;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnLabelConnRgn()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgInvert = *(CImgProcess *)&(!ImgInput);
+	CImgProcess ImgOutput = ImgInvert;
+
+	ImgInvert.LabelConnRgn(&ImgOutput, 8);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
 }

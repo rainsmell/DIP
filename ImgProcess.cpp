@@ -1776,3 +1776,375 @@ int CImgProcess::InterpBilinear(double x, double y)
 		}
 	}
 }
+
+void CImgProcess::Erode(CImgProcess* pTo, int se[3][3])
+{
+	bool bMatched;
+
+	int nHeight = GetHeight();
+	int nWidth = GetWidthPixel();
+
+	pTo->InitPixels(255);
+
+	for (int i = 1; i < nHeight - 1; i++)
+	{
+		for (int j = 1; j < nWidth - 1; j++)
+		{
+			bMatched = true;
+			for (int m = 0; m < 3; m++)
+			{
+				for (int n = 0; n < 3; n++)
+				{
+					if (se[m][n] == -1)
+						continue;
+					if (se[m][n] == 0)
+					{
+						if (GetGray(j - 1 + n, i - 1 + m) != 255)
+						{
+							bMatched = false;
+							break;
+						}
+					}
+					else if (se[m][n] == 1)
+					{
+						if (GetGray(j - 1 + n, i - 1 + m) != 0)
+						{
+							bMatched = false;
+							break;
+						}
+					}
+				}
+			}
+			if (bMatched)
+				pTo->SetPixel(j, i, RGB(0, 0, 0));
+		}
+	}
+}
+
+void CImgProcess::Dilate(CImgProcess* pTo, int se[3][3])
+{
+	int nHeight = GetHeight();
+	int nWidth = GetWidthPixel();
+
+	for (int i = 1; i < nHeight - 1; i++)
+	{
+		for (int j = 1; j < nWidth - 1; j++)
+		{
+			for (int m = 0; m < 3; m++)
+			{
+				for (int n = 0; n < 3; n++)
+				{
+					if (se[m][n] == -1)
+						continue;
+					if (se[m][n] == 1)
+					{
+						if (GetGray(j - 1 + n, i - 1 + m) == 0)
+						{
+							pTo->SetPixel(j, i, RGB(0, 0, 0));
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void CImgProcess::Open(CImgProcess* pTo, int se[3][3])
+{
+	pTo->InitPixels(255);
+	Erode(pTo, se);
+	CImgProcess tmpImg = *pTo;
+	tmpImg.Dilate(pTo, se);
+}
+
+void CImgProcess::Close(CImgProcess* pTo, int se[3][3])
+{
+	pTo->InitPixels(255);
+	Dilate(pTo, se);
+	CImgProcess tmpImg = *pTo;
+	tmpImg.Erode(pTo, se);
+}
+
+void CImgProcess::LabelConnRgn(CImgProcess* pTo, int nConn)
+{
+	int se[3][3] = { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+	if (nConn == 4)
+	{
+		se[0][0] = -1;
+		se[0][2] = -1;
+		se[2][0] = -1;
+		se[2][2] = -1;
+	}
+
+	CImgProcess ImgBackup = *this;
+	CImgProcess ImgTmp = *pTo;
+
+	int nHeight = GetHeight();
+	int nWidth = GetWidthPixel();
+	int nConnRgn = 1;
+
+	for (int i = 0; i < nHeight; i++)
+	{
+		for (int j = 0; j < nWidth; j++)
+		{
+			BYTE gray = GetGray(j, i);
+			if (gray == 0)
+			{
+				pTo->InitPixels(255);
+				pTo->SetPixel(j, i, RGB(0, 0, 0));
+
+				ImgTmp = *pTo;
+
+				while (true)
+				{
+					ImgTmp.Dilate(pTo, se);
+					*pTo = *pTo & ImgBackup;
+					if (*pTo == ImgTmp)
+						break;
+					ImgTmp = *pTo;
+				}
+
+				for (int m = 0; m < nHeight; m++)
+				{
+					for (int n = 0; n < nWidth; n++)
+					{
+						gray = pTo->GetGray(n, m);
+						if (gray == 0)
+							SetPixel(n, m, RGB(nConnRgn, nConnRgn, nConnRgn));
+					}
+				}
+				nConnRgn++;
+				if (nConnRgn > 255)
+				{
+					AfxMessageBox(L"目前该函数最多支持标注255个连通分量");
+					i = nHeight;
+					break;
+				}
+			}
+		}
+	}
+}
+
+void CImgProcess::Thining(CImgProcess* pTo)
+{
+	bool condition1, condition2, condition3, condition4;
+	bool bModified = true;
+	unsigned char neighbour[5][5];
+
+	int nHeight = GetHeight();
+	int nWidth = GetWidthPixel();
+
+	while (bModified)
+	{
+		bModified = false;
+		CImgProcess pic = *this;
+		pic.InitPixels(255);
+
+		for (int i = 2; i < nHeight - 2; i++)
+		{
+			for (int j = 2; j < nWidth - 2; j++)
+			{
+				condition1 = false;
+				condition2 = false;
+				condition3 = false;
+				condition4 = false;
+
+				BYTE data = GetPixel(j, i);
+				if (data == 255)
+					continue;
+
+				for (int n = 0; n < 5; n++)
+					for (int m = 0; m < 5; m++)
+						neighbour[n][m] = (GetPixel(j - 2 + m, i - 2 + n) == 0);
+
+				// condition1 test
+				int count = neighbour[1][1] + neighbour[1][2] + neighbour[1][3]
+					+ neighbour[2][1] + neighbour[2][3]
+					+ neighbour[3][1] + neighbour[3][2] + neighbour[3][3];
+				if (count >= 2 && count <= 6)
+					condition1 = true;
+
+				// condition2 test
+				count = 0;
+				if (neighbour[1][2] == 0 && neighbour[1][1] == 1)
+					count++;
+				if (neighbour[1][1] == 0 && neighbour[2][1] == 1)
+					count++;
+				if (neighbour[2][1] == 0 && neighbour[3][1] == 1)
+					count++;
+				if (neighbour[3][1] == 0 && neighbour[3][2] == 1)
+					count++;
+				if (neighbour[3][2] == 0 && neighbour[3][3] == 1)
+					count++;
+				if (neighbour[3][3] == 0 && neighbour[2][3] == 1)
+					count++;
+				if (neighbour[2][3] == 0 && neighbour[1][3] == 1)
+					count++;
+				if (neighbour[1][3] == 0 && neighbour[1][2] == 1)
+					count++;
+				if (count == 1)
+					condition2 = true;
+
+				// condition3 test
+				if (neighbour[1][2] * neighbour[2][1] * neighbour[2][3] == 0)
+					condition3 = true;
+				else
+				{
+					count = 0;
+					if (neighbour[0][2] == 0 && neighbour[0][1] == 1)
+						count++;
+					if (neighbour[0][1] == 0 && neighbour[1][1] == 1)
+						count++;
+					if (neighbour[1][1] == 0 && neighbour[2][1] == 1)
+						count++;
+					if (neighbour[2][1] == 0 && neighbour[2][2] == 1)
+						count++;
+					if (neighbour[2][2] == 0 && neighbour[2][3] == 1)
+						count++;
+					if (neighbour[2][3] == 0 && neighbour[1][3] == 1)
+						count++;
+					if (neighbour[1][3] == 0 && neighbour[0][3] == 1)
+						count++;
+					if (neighbour[0][3] == 0 && neighbour[0][2] == 1)
+						count++;
+					if (count != 1)
+						condition3 = true;
+				}
+
+				// condition4 test
+				if (neighbour[1][2] * neighbour[2][1] * neighbour[3][2] == 0)
+					condition4 = true;
+				else
+				{
+					count = 0;
+					if (neighbour[1][1] == 0 && neighbour[1][0] == 1)
+						count++;
+					if (neighbour[1][0] == 0 && neighbour[2][0] == 1)
+						count++;
+					if (neighbour[2][0] == 0 && neighbour[3][0] == 1)
+						count++;
+					if (neighbour[3][0] == 0 && neighbour[3][1] == 1)
+						count++;
+					if (neighbour[3][1] == 0 && neighbour[3][2] == 1)
+						count++;
+					if (neighbour[3][2] == 0 && neighbour[2][2] == 1)
+						count++;
+					if (neighbour[2][2] == 0 && neighbour[1][2] == 1)
+						count++;
+					if (neighbour[1][2] == 0 && neighbour[1][1] == 1)
+						count++;
+					if (count != 1)
+						condition4 = true;
+				}
+
+				if (condition1 && condition2 && condition3 && condition4)
+				{
+					pic.SetPixel(j, i, RGB(255, 255, 255));
+					bModified = true;
+				}
+				else
+					pic.SetPixel(j, i, RGB(0, 0, 0));
+			}
+		}
+		*this = pic;
+	}
+}
+
+void CImgProcess::Convex(CImgProcess* pTo, BOOL constrain)
+{
+	int se1[3][3] = { {1, -1, -1}, {1, 0, -1}, {1, -1, -1} };
+	int se2[3][3] = { {1, 1, 1,}, {-1, 0, -1}, {-1, -1, -1} };
+	int se3[3][3] = { {-1, -1, 1}, {-1, 0, 1}, {-1, -1, 1} };
+	int se4[3][3] = { {-1, -1, -1}, {-1, 0, -1}, {1, 1, 1} };
+
+	pTo->InitPixels(255);
+
+	CImgProcess tmp1 = *this;
+	while (true)
+	{
+		tmp1.Erode(pTo, se1);
+		*pTo = *pTo | tmp1;
+		if (*pTo == tmp1)
+			break;
+		tmp1 = *pTo;
+	}
+
+	CImgProcess tmp2 = *this;
+	while (true)
+	{
+		tmp2.Erode(pTo, se2);
+		*pTo = *pTo | tmp2;
+		if (*pTo == tmp2)
+			break;
+		tmp2 = *pTo;
+	}
+
+	CImgProcess tmp3 = *this;
+	while (true)
+	{
+		tmp3.Erode(pTo, se3);
+		*pTo = *pTo | tmp3;
+		if (*pTo == tmp3)
+			break;
+		tmp3 = *pTo;
+	}
+
+	CImgProcess tmp4 = *this;
+	while (true)
+	{
+		tmp4.Erode(pTo, se4);
+		*pTo = *pTo | tmp4;
+		if (*pTo == tmp4)
+			break;
+		tmp4 = *pTo;
+	}
+
+	pTo->InitPixels(255);
+
+	int nHeight = GetHeight();
+	int nWidth = GetWidthPixel();
+
+	for (int i = 0; i < nHeight; i++)
+	{
+		for (int j = 0; j < nWidth; j++)
+		{
+			if (tmp1.GetGray(j, i) == 0 || tmp2.GetGray(j, i) == 0 ||
+				tmp3.GetGray(j, i) == 0 || tmp3.GetGray(j, i) == 0)
+			{
+				pTo->SetPixel(j, i, RGB(0, 0, 0));
+			}
+		}
+	}
+
+	int nTop = nHeight;
+	int nBottom = 0;
+	int nLeft = nWidth;
+	int nRight = 0;
+
+	for (int i = 0; i < nHeight; i++)
+	{
+		for (int j = 0; j < nWidth; j++)
+		{
+			if (GetGray(j, i) == 0)
+			{
+				if (j > nRight)
+					nRight = j;
+				if (j < nLeft)
+					nLeft = j;
+				if (i > nBottom)
+					nBottom = i;
+				if (i < nTop)
+					nTop = i;
+			}
+		}
+	}
+
+	if (constrain)
+	{
+		for (int i = 0; i < nHeight; i++)
+			for (int j = 0; j < nWidth; j++)
+				if (i < nTop || i > nBottom || j < nLeft || j > nRight)
+					pTo->SetPixel(j, i, RGB(255, 255, 255));
+	}
+}
