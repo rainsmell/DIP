@@ -2148,3 +2148,77 @@ void CImgProcess::Convex(CImgProcess* pTo, BOOL constrain)
 					pTo->SetPixel(j, i, RGB(255, 255, 255));
 	}
 }
+
+void CImgProcess::GrayDilate(CImgProcess* pTo, int nTempH, int nTempW, int nTempMY, int nTempMX, int** se)
+{
+	int nHeight = GetHeight();
+	int nWidth = GetWidthPixel();
+
+	for (int i = nTempMY; i < nHeight - nTempH + nTempMY; i++)
+	{
+		for (int j = nTempMX; j < nWidth - nTempW + nTempMX; j++)
+		{
+			BYTE maxVal = 0;
+			for (int m = 0; m < nTempH; m++)
+			{
+				for (int n = 0; n < nTempW; n++)
+				{
+					if (se[m][n] == 1)
+					{
+						BYTE pix = GetGray(j - nTempMX + n, i - nTempMY + m);
+						if (pix > maxVal)
+							maxVal = pix;
+					}
+				}
+			}
+			pTo->SetPixel(j, i, RGB(maxVal, maxVal, maxVal));
+		}
+	}
+}
+
+void CImgProcess::GrayErode(CImgProcess* pTo, int nTempH, int nTempW, int nTempMY, int nTempMX, int** se)
+{
+	int nHeight = GetHeight();
+	int nWidth = GetWidthPixel();
+
+	for (int i = nTempMY; i < nHeight - nTempH + nTempMY; i++)
+	{
+		for (int j = nTempMX; j < nWidth - nTempW + nTempMX; j++)
+		{
+			BYTE minVal = UINT8_MAX;
+			for (int m = 0; m < nTempH; m++)
+			{
+				for (int n = 0; n < nTempW; n++)
+				{
+					if (se[m][n] == 1)
+					{
+						BYTE pix = GetGray(j - nTempMX + n, i - nTempMY + m);
+						if (pix < minVal)
+							minVal = pix;
+					}
+				}
+			}
+			pTo->SetPixel(j, i, RGB(minVal, minVal, minVal));
+		}
+	}
+}
+
+void CImgProcess::GrayOpen(CImgProcess* pTo, int nTempH, int nTempW, int nTempMY, int nTempMX, int** se)
+{
+	GrayErode(pTo, nTempH, nTempW, nTempMY, nTempMX, se);
+	CImgProcess imgTmp = *pTo;
+	imgTmp.GrayDilate(pTo, nTempH, nTempW, nTempMY, nTempMX, se);
+}
+
+void CImgProcess::GrayClose(CImgProcess* pTo, int nTempH, int nTempW, int nTempMY, int nTempMX, int** se)
+{
+	GrayDilate(pTo, nTempH, nTempW, nTempMY, nTempMX, se);
+	CImgProcess imgTmp = *pTo;
+	imgTmp.GrayErode(pTo, nTempH, nTempW, nTempMY, nTempMX, se);
+}
+
+void CImgProcess::TopHat(CImgProcess* pTo, int nTempH, int nTempW, int nTempMY, int nTempMX, int** se)
+{
+	GrayOpen(pTo, nTempH, nTempW, nTempMY, nTempMX, se);
+	*pTo = (*this) - *pTo;
+}

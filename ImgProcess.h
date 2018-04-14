@@ -96,6 +96,7 @@ public:
 	void DCT_ALL(CImgProcess* pTo);
 	void IDCT_ALL(CImgProcess* pTo);
 
+	// 形态学相关
 	void Erode(CImgProcess* pTo, int se[3][3]);
 	void Dilate(CImgProcess* pTo, int se[3][3]);
 	void Open(CImgProcess* pTo, int se[3][3]);
@@ -104,6 +105,13 @@ public:
 	void LabelConnRgn(CImgProcess* pTo, int nConn);
 	void Thining(CImgProcess* pTo);
 	void Convex(CImgProcess* pTo, BOOL constrain);
+
+	void GrayDilate(CImgProcess* pTo, int nTempH, int nTempW, int nTempMY, int nTempMX, int** se);
+	void GrayErode(CImgProcess* pTo, int nTempH, int nTempW, int nTempMY, int nTempMX, int** se);
+	void GrayOpen(CImgProcess* pTo, int nTempH, int nTempW, int nTempMY, int nTempMX, int** se);
+	void GrayClose(CImgProcess* pTo, int nTempH, int nTempW, int nTempMY, int nTempMX, int** se);
+
+	void TopHat(CImgProcess* pTo, int nTempH, int nTempW, int nTempMY, int nTempMX, int** se);
 
 	void Threshold(CImgProcess* pTo, BYTE nThres);
 };

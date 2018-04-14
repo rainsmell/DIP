@@ -262,6 +262,13 @@ BEGIN
         MENUITEM "连通分量",                        ID_32824
         MENUITEM "细化",                          ID_32823
         MENUITEM "凸包",                          ID_32822
+        MENUITEM SEPARATOR
+        MENUITEM "灰度腐蚀",                        ID_32825
+        MENUITEM "灰度膨胀",                        ID_32826
+        MENUITEM "灰度开运算",                       ID_32827
+        MENUITEM "灰度闭运算",                       ID_32828
+        MENUITEM SEPARATOR
+        MENUITEM "顶帽变换",                        ID_32829
     END
     MENUITEM SEPARATOR
     POPUP "编辑(&E)"

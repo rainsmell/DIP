@@ -27,6 +27,7 @@
 #include "DlgHuffman.h"
 
 #include <iostream>
+#include <algorithm>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -98,6 +99,11 @@ BEGIN_MESSAGE_MAP(CDIPView, CView)
 	ON_COMMAND(ID_32822, &CDIPView::OnConvex)
 	ON_COMMAND(ID_32823, &CDIPView::OnThining)
 	ON_COMMAND(ID_32824, &CDIPView::OnLabelConnRgn)
+	ON_COMMAND(ID_32825, &CDIPView::OnGrayErode)
+	ON_COMMAND(ID_32826, &CDIPView::OnGrayDilate)
+	ON_COMMAND(ID_32827, &CDIPView::OnGrayOpen)
+	ON_COMMAND(ID_32828, &CDIPView::OnGrayClose)
+	ON_COMMAND(ID_32829, &CDIPView::OnTopHat)
 END_MESSAGE_MAP()
 
 // CDIPView 构造/析构
@@ -1830,6 +1836,211 @@ void CDIPView::OnLabelConnRgn()
 	CImgProcess ImgOutput = ImgInvert;
 
 	ImgInvert.LabelConnRgn(&ImgOutput, 8);
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnGrayErode()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	int** se = new int*[3];
+
+	for (int i = 0; i < 3; i++)
+	{
+		se[i] = new int[3];
+		std::fill(&se[i][0], &se[i][2], 1);
+	}
+
+	ImgInput.GrayErode(&ImgOutput, 3, 3, 2, 2, se);
+
+	for (int i = 0; i < 3; i++)
+		delete [] se[i];
+	delete[] se;
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnGrayDilate()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	int** se = new int*[3];
+
+	for (int i = 0; i < 3; i++)
+	{
+		se[i] = new int[3];
+		std::fill(&se[i][0], &se[i][2], 1);
+	}
+
+	ImgInput.GrayDilate(&ImgOutput, 3, 3, 2, 2, se);
+
+	for (int i = 0; i < 3; i++)
+		delete[] se[i];
+	delete[] se;
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnGrayOpen()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	int** se = new int*[3];
+
+	for (int i = 0; i < 3; i++)
+	{
+		se[i] = new int[3];
+		std::fill(&se[i][0], &se[i][2], 1);
+	}
+
+	ImgInput.GrayOpen(&ImgOutput, 3, 3, 2, 2, se);
+
+	for (int i = 0; i < 3; i++)
+		delete[] se[i];
+	delete[] se;
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnGrayClose()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	int** se = new int*[3];
+
+	for (int i = 0; i < 3; i++)
+	{
+		se[i] = new int[3];
+		std::fill(&se[i][0], &se[i][2], 1);
+	}
+
+	ImgInput.GrayClose(&ImgOutput, 3, 3, 2, 2, se);
+
+	for (int i = 0; i < 3; i++)
+		delete[] se[i];
+	delete[] se;
+
+	pDoc->m_Image = ImgOutput;
+
+	if (!pDoc->IsModified())
+	{
+		pDoc->SetModifiedFlag(TRUE);
+		pDoc->SetTitle(pDoc->GetTitle() + L"*");
+	}
+
+	pDoc->UpdateAllViews(NULL);
+}
+
+
+void CDIPView::OnTopHat()
+{
+	// TODO: Add your command handler code here
+	CDIPDoc* pDoc = GetDocument();
+
+	CImgProcess ImgInput = pDoc->m_Image;
+
+	if (ImgInput.m_pBMIH->biBitCount != 8)
+	{
+		AfxMessageBox(L"不是8-bpp灰度图像，无法处理！");
+		return;
+	}
+
+	CImgProcess ImgOutput = ImgInput;
+
+	int** se = new int*[3];
+
+	for (int i = 0; i < 3; i++)
+	{
+		se[i] = new int[3];
+		std::fill(&se[i][0], &se[i][2], 1);
+	}
+
+	ImgInput.TopHat(&ImgOutput, 3, 3, 2, 2, se);
+
+	for (int i = 0; i < 3; i++)
+		delete[] se[i];
+	delete[] se;
 
 	pDoc->m_Image = ImgOutput;
 

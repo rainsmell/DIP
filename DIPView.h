@@ -98,6 +98,11 @@ public:
 	afx_msg void OnConvex();
 	afx_msg void OnThining();
 	afx_msg void OnLabelConnRgn();
+	afx_msg void OnGrayErode();
+	afx_msg void OnGrayDilate();
+	afx_msg void OnGrayOpen();
+	afx_msg void OnGrayClose();
+	afx_msg void OnTopHat();
 };
 
 #ifndef _DEBUG  // DIPView.cpp 中的调试版本
