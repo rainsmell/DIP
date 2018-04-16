@@ -147,7 +147,7 @@ BOOL CImgProcess::LinTran(CImgProcess* pTo, double dFa, double dFb)
 			if (target < 0) target = 0;
 			if (target > 255) target = 255;
 
-			pTo->SetPixel(j, i, target);
+			pTo->SetPixel(j, i, RGB(target, target, target));
 		}
 	}
 	return TRUE;
@@ -171,7 +171,7 @@ BOOL CImgProcess::LogTran(CImgProcess* pTo, double dC)
 			if (target < 0) target = 0;
 			if (target > 255) target = 255;
 
-			pTo->SetPixel(j, i, target);
+			pTo->SetPixel(j, i, RGB(target, target, target));
 		}
 	}
 
@@ -194,7 +194,7 @@ BOOL CImgProcess::GammaTran(CImgProcess* pTo, double gamma, double comp)
 			target = pow((gray + comp) / 255.0, gamma) * 255;
 			if (target < 0) target = 0;
 			if (target > 255) target = 255;
-			pTo->SetPixel(j, i, target);
+			pTo->SetPixel(j, i, RGB(target, target, target));
 		}
 	}
 	return TRUE;
@@ -212,7 +212,7 @@ void CImgProcess::Threshold(CImgProcess* pTo, BYTE nTres)
 				bt = 255;
 			else
 				bt = 0;
-			pTo->SetPixel(j, i, bt);
+			pTo->SetPixel(j, i, RGB(bt, bt, bt));
 		}
 	}
 }
@@ -437,7 +437,7 @@ void CImgProcess::Rotate(CImgProcess* pTo, float ang)
 
 void CImgProcess::Template(CImgProcess* pTo, int nTempH, int nTempW, int nTempMY, int nTempMX, FLOAT *pfArray, FLOAT fCoef)
 {
-	//pTo->InitPixels(0);
+	pTo->InitPixels(0);
 
 	for (int i = nTempMY; i < GetHeight() - (nTempH - nTempMY) + 1; i++)
 		for (int j = nTempMX; j < GetWidthPixel() - (nTempW - nTempMX) + 1; j++)
@@ -2221,4 +2221,312 @@ void CImgProcess::TopHat(CImgProcess* pTo, int nTempH, int nTempW, int nTempMY, 
 {
 	GrayOpen(pTo, nTempH, nTempW, nTempMY, nTempMX, se);
 	*pTo = (*this) - *pTo;
+}
+
+BOOL CImgProcess::EdgeSobel(CImgProcess* pTo, BYTE bThre, Edge_t bEdgeType, BOOL bThinning, BOOL bGOnly)
+{
+	if (m_pBMIH->biBitCount != 8) return false;
+
+	const float cfSobelH[9] = {
+		-1, -1, -1,
+		 0,  0,  0,
+		 1,  1,  1,
+	};
+
+	const float cfSobelV[9] = {
+		-1, 0, 1,
+		-1, 0, 1,
+		-1, 0, 1,
+	};
+
+	const float cfSobelCW[9] = {
+		-1, -1,  0,
+		-1,  0,  1,
+		 0,  1,  1,
+	};
+
+	const float cfSobelCCW[9] = {
+		0, -1, -1,
+		1,  0, -1,
+		1,  1,  0,
+	};
+
+	CImgProcess imgTemp = *this;
+	CImgProcess imgMid = *this;
+
+	switch (bEdgeType)
+	{
+	case Edge_ALL:
+		Template(&imgTemp, 3, 3, 1, 1, (float *)cfSobelH, 1);
+		Template(&imgMid, 3, 3, 1, 1, (float*)cfSobelV, 1);
+		imgTemp = imgTemp + imgMid;
+		Template(&imgMid, 3, 3, 1, 1, (float*)cfSobelCW, 1);
+		imgTemp = imgTemp + imgMid;
+		Template(&imgMid, 3, 3, 1, 1, (float*)cfSobelCCW, 1);
+		imgTemp = imgTemp + imgMid;
+		break;
+	case Edge_H:
+		Template(&imgTemp, 3, 3, 1, 1, (float *)cfSobelH, 1);
+		break;
+	case Edge_V:
+		Template(&imgTemp, 3, 3, 1, 1, (float *)cfSobelV, 1);
+		break;
+	case Edge_CW:
+		Template(&imgTemp, 3, 3, 1, 1, (float *)cfSobelCW, 1);
+		break;
+	case Edge_CCW:
+		Template(&imgTemp, 3, 3, 1, 1, (float *)cfSobelCCW, 1);
+		break;
+	default:
+		return false;
+	}
+
+	if (bGOnly)
+	{
+		*pTo = imgTemp;
+	}
+	else
+	{
+		if (bThre)
+			imgTemp.Threshold(pTo, bThre);
+		//else
+			//imgTemp.AutoThreshold(pTo);
+
+		if (bThinning)
+		{
+			pTo->LinTran(&imgTemp, -1, 255);
+			imgTemp.Thining(NULL);
+			imgTemp.LinTran(pTo, -1, 255);
+		}
+	}
+
+	return true;
+}
+
+BOOL CImgProcess::EdgePrewitt(CImgProcess* pTo, BYTE bThre, Edge_t bEdgeType, BOOL bThinning, BOOL bGOnly)
+{
+	if (m_pBMIH->biBitCount != 8) return false;
+
+	const float cfPrewittH[9] = {
+		-1, -2, -1,
+		0,  0,  0,
+		1,  2,  1,
+	};
+
+	const float cfPrewittV[9] = {
+		-1, 0, 1,
+		-2, 0, 2,
+		-1, 0, 1,
+	};
+
+	const float cfPrewittCW[9] = {
+		-2, -1,  0,
+		-1,  0,  1,
+		0,  1,  2,
+	};
+
+	const float cfPrewittCCW[9] = {
+		0, -1, -2,
+		1,  0, -1,
+		1,  1,  0,
+	};
+
+	CImgProcess imgTemp = *this;
+	CImgProcess imgMid = *this;
+
+	switch (bEdgeType)
+	{
+	case Edge_ALL:
+		Template(&imgTemp, 3, 3, 1, 1, (float *)cfPrewittH, 1);
+		Template(&imgMid, 3, 3, 1, 1, (float*)cfPrewittV, 1);
+		imgTemp = imgTemp + imgMid;
+		Template(&imgMid, 3, 3, 1, 1, (float*)cfPrewittCW, 1);
+		imgTemp = imgTemp + imgMid;
+		Template(&imgMid, 3, 3, 1, 1, (float*)cfPrewittCCW, 1);
+		imgTemp = imgTemp + imgMid;
+		break;
+	case Edge_H:
+		Template(&imgTemp, 3, 3, 1, 1, (float *)cfPrewittH, 1);
+		break;
+	case Edge_V:
+		Template(&imgTemp, 3, 3, 1, 1, (float *)cfPrewittV, 1);
+		break;
+	case Edge_CW:
+		Template(&imgTemp, 3, 3, 1, 1, (float *)cfPrewittCW, 1);
+		break;
+	case Edge_CCW:
+		Template(&imgTemp, 3, 3, 1, 1, (float *)cfPrewittCCW, 1);
+		break;
+	default:
+		return false;
+	}
+
+	if (bGOnly)
+	{
+		*pTo = imgTemp;
+	}
+	else
+	{
+		if (bThre)
+			imgTemp.Threshold(pTo, bThre);
+		//else
+		//imgTemp.AutoThreshold(pTo);
+
+		if (bThinning)
+		{
+			pTo->LinTran(&imgTemp, -1, 255);
+			imgTemp.Thining(NULL);
+			imgTemp.LinTran(pTo, -1, 255);
+		}
+	}
+
+	return true;
+}
+
+void CImgProcess::EdgeLoG(CImgProcess* pTo, BYTE bThre, double dSigma, BOOL bThinning)
+{
+	Template(pTo, 5, 5, 2, 2, Template_Log, 1);
+
+	CImgProcess imgTemp = *pTo;
+
+	//imgTemp.AutoThreshold(pTo);
+
+	pTo->LinTran(&imgTemp, -1, 255);
+
+	imgTemp.Thining(NULL);
+
+	imgTemp.LinTran(pTo, -1, 255);
+}
+
+void CImgProcess::EdgeCanny(CImgProcess* pTo, BYTE bThreL, BYTE bThreH, BOOL bThinning)
+{
+	if (m_pBMIH->biBitCount != 8) return;
+
+	int nHeight = GetHeight();
+	int nWidth = GetWidthPixel();
+
+	CImgProcess imgGH = *this, imgGV = *this, imgGCW = *this,
+		imgGCCW = *this, imgGratitude = *this;
+
+	EdgePrewitt(&imgGH, 100, Edge_H, 0, 1);
+	EdgePrewitt(&imgGV, 100, Edge_V, 0, 1);
+	EdgePrewitt(&imgGCW, 100, Edge_CW, 0, 1);
+	EdgePrewitt(&imgGCCW, 100, Edge_CCW, 0, 1);
+
+	BYTE* pbDirection = new BYTE[nHeight * nWidth];
+	memset(pbDirection, 0, sizeof(BYTE) * nHeight * nWidth);
+
+	for (int i = 0; i < nHeight; i++)
+	{
+		for (int j = 0; j < nWidth; j++)
+		{
+			BYTE gray = 0;
+			if (gray < imgGH.GetGray(j, i))
+			{
+				gray = imgGH.GetGray(j, i);
+				pbDirection[i * nWidth + j] = Edge_H;
+				imgGratitude.SetPixel(j, i, RGB(gray, gray, gray));
+			}
+			if (gray < imgGV.GetGray(j, i))
+			{
+				gray = imgGV.GetGray(j, i);
+				pbDirection[i * nWidth + j] = Edge_V;
+				imgGratitude.SetPixel(j, i, RGB(gray, gray, gray));
+			}
+			if (gray < imgGCW.GetGray(j, i))
+			{
+				gray = imgGCW.GetGray(j, i);
+				pbDirection[i * nWidth + j] = Edge_CW;
+				imgGratitude.SetPixel(j, i, RGB(gray, gray, gray));
+			}
+			if (gray < imgGCCW.GetGray(j, i))
+			{
+				gray = imgGCCW.GetGray(j, i);
+				pbDirection[i * nWidth + j] = Edge_CCW;
+				imgGratitude.SetPixel(j, i, RGB(gray, gray, gray));
+			}
+		}
+	}
+
+	CImgProcess* pImgThreL = &imgGH, *pImgThreH = &imgGV;
+
+	if (bThreL > bThreH)
+		std::swap(bThreH, bThreL);
+
+	if (bThreH == 0)
+	{
+		const int nMinDiff = 20;
+		int nDiffGray;
+
+		//bThreH = 1.2 * imgGratitude.DetectThreshold()
+		bThreL = 0.4 * bThreH;
+
+		if (nDiffGray < nMinDiff)
+			return;
+	}
+
+	if (bThreL == 0)
+		bThreL = 0.4 * bThreH;
+
+	imgGratitude.Threshold(pImgThreH, bThreH);
+	imgGratitude.Threshold(pImgThreL, bThreL);
+
+	for (int i = 1; i < nHeight - 1; i++)
+	{
+		for (int j = 1; j < nWidth - 1; j++)
+		{
+			if (pImgThreH->GetGray(j, i))
+			{
+				pTo->SetPixel(j, i, RGB(255, 255, 255));
+				switch (pbDirection[i * nWidth + j])
+				{
+				case Edge_H:
+					if (pImgThreL->GetGray(j - 1, i))
+						pImgThreH->SetPixel(j - 1, i, RGB(255, 255, 255));
+					if (pImgThreL->GetGray(j + 1, i))
+						pImgThreH->SetPixel(j + 1, i, RGB(255, 255, 255));
+					break;
+				case Edge_V:
+					if (pImgThreL->GetGray(j, i - 1))
+						pImgThreH->SetPixel(j, i - 1, RGB(255, 255, 255));
+					if (pImgThreL->GetGray(j, i + 1))
+						pImgThreH->SetPixel(j, i + 1, RGB(255, 255, 255));
+					break;
+				case Edge_CW:
+					if (pImgThreL->GetGray(j + 1, i - 1))
+						pImgThreH->SetPixel(j + 1, i - 1, RGB(255, 255, 255));
+					if (pImgThreL->GetGray(j - 1, i + 1))
+						pImgThreH->SetPixel(j - 1, i + 1, RGB(255, 255, 255));
+					break;
+				case Edge_CCW:
+					if (pImgThreL->GetGray(j - 1, i - 1))
+						pImgThreH->SetPixel(j - 1, i - 1, RGB(255, 255, 255));
+					if (pImgThreL->GetGray(j + 1, i + 1))
+						pImgThreH->SetPixel(j + 1, i + 1, RGB(255, 255, 255));
+					break;
+				}
+			}
+		}
+	}
+
+	if (bThinning)
+	{
+		pImgThreH->LinTran(pImgThreL, -1, 255);
+		pImgThreL->Thining(NULL);
+		pImgThreL->LinTran(pTo, -1, 255);
+	}
+	else
+		*pTo = *pImgThreH;
+
+	delete[] pbDirection;
+}
+
+int CImgProcess::DetectThreshould(int nMaxIter, int& nDiffRet)
+{
+	int nThreshold;
+	nDiffRet = 0;
+
+	int nHistogram[256] = { 0 };
+	
+	
 }

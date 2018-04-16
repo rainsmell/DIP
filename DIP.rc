@@ -250,7 +250,7 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "ªÙ∑Ú¬¸±‡¬Î",                       ID_32816
     END
-    POPUP "–ŒÃ¨—ß±‰ªª"
+    POPUP "–ŒÃ¨—ß±‰ªª(&M)"
     BEGIN
         MENUITEM "∏Ø ¥",                          ID_32817
         MENUITEM "≈Ú’Õ",                          ID_32818
@@ -269,6 +269,13 @@ BEGIN
         MENUITEM "ª“∂»±’‘ÀÀ„",                       ID_32828
         MENUITEM SEPARATOR
         MENUITEM "∂•√±±‰ªª",                        ID_32829
+    END
+    POPUP "ÕºœÒ∑÷∏Ó"
+    BEGIN
+        MENUITEM "Sobel±ﬂ‘µºÏ≤‚",                   ID_32830
+        MENUITEM "LoG±ﬂ‘µºÏ≤‚",                     ID_32831
+        MENUITEM "Prewitt±ﬂ‘µºÏ≤‚",                 ID_32833
+        MENUITEM "Canny±ﬂ‘µºÏ≤‚",                   ID_32832
     END
     MENUITEM SEPARATOR
     POPUP "±‡º≠(&E)"

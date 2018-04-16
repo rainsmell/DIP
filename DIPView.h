@@ -103,6 +103,10 @@ public:
 	afx_msg void OnGrayOpen();
 	afx_msg void OnGrayClose();
 	afx_msg void OnTopHat();
+	afx_msg void OnEdgeSobel();
+	afx_msg void OnEdgeLoG();
+	afx_msg void OnEdgePrewitt();
+	afx_msg void OnEdgeCanny();
 };
 
 #ifndef _DEBUG  // DIPView.cpp 中的调试版本

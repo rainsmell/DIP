@@ -14,6 +14,9 @@ class CImgProcess :
 	public CImg
 {
 public:
+	typedef enum { Edge_ALL, Edge_H, Edge_V, Edge_CW, Edge_CCW }Edge_t;
+
+public:
 	CImgProcess();
 	~CImgProcess();
 
@@ -113,6 +116,14 @@ public:
 
 	void TopHat(CImgProcess* pTo, int nTempH, int nTempW, int nTempMY, int nTempMX, int** se);
 
+	// ±ßÔµ¼ì²â
+	BOOL EdgeSobel(CImgProcess* pTo, BYTE bThre, Edge_t bEdgeType, BOOL bThinning, BOOL bGOnly);
+	BOOL EdgePrewitt(CImgProcess* pTo, BYTE bThre, Edge_t bEdgeType, BOOL bThinning, BOOL bGOnly);
+	void EdgeLoG(CImgProcess* pTo, BYTE bThre, double dSigma, BOOL bThinning);
+	void EdgeCanny(CImgProcess* pTo, BYTE bThreL, BYTE bThreH, BOOL bThinning);
+
 	void Threshold(CImgProcess* pTo, BYTE nThres);
+	int DetectThreshould(int nMaxIter, int& nDiffRet);
+
 };
 
